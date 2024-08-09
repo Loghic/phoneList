@@ -165,15 +165,22 @@ function getAssignedExpert($system_id, $conn) {
                         $expertSelect.empty(); // Clear existing options
                         $expertSelect.append('<option value="new">Add New Expert</option>'); // Option to add new expert
 
+                        var selectedExpertId = data.expert.expert_id;
+
+                        // Populate the dropdown with experts
                         $.each(data.experts, function(index, expert) {
-                            var selected = (expert.Id == data.expert.expert_id) ? 'selected' : '';
                             $expertSelect.append(
-                                $('<option>', { value: expert.Id, text: expert.name, selected: selected })
+                                $('<option>', { value: expert.Id, text: expert.name })
                             );
                         });
 
+                        // Set the dropdown value to the current expert's ID
+                        $expertSelect.val(selectedExpertId);
+
+                        // Update the current expert name field
                         $("#expert_name").val(data.expert.expert_name);
 
+                        // Open the edit dialog
                         $("#edit-dialog").dialog("open");
                     }
                 });

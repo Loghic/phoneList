@@ -30,14 +30,17 @@ while ($row = $expertsResult->fetch_assoc()) {
     $experts[] = $row;
 }
 
+// Create the response array
 $response = [
     'expert' => $expert,
     'experts' => $experts
 ];
 
+// Set the header and output the response
 header('Content-Type: application/json');
 echo json_encode($response);
 
+// Close statements and connection
 $stmt->close();
 $expertsStmt->close();
 $conn->close();

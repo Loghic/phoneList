@@ -21,45 +21,7 @@ $systems = $systemsStmt->get_result();
 <head>
     <meta charset="UTF-8">
     <title>Telephone List Management</title>
-    <style>
-        #assign-experts-button {
-            background-color: #008CBA; /* Blue */
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px 0;
-        }
-        #assign-experts-button:hover {
-            background-color: #007bb5; /* Darker blue */
-        }
-        .edit-button, .add-expert-button {
-            background-color: #4CAF50; /* Green */
-            border: none;
-            color: white;
-            padding: 5px 10px;
-            text-align: center;
-            text-decoration: none;
-            display: inline-block;
-            font-size: 14px;
-            margin: 4px 2px;
-            cursor: pointer;
-        }
-        .edit-button:active {
-            background-color: #45a049; /* Darker green */
-        }
-        .add-expert-button {
-            background-color: #008CBA; /* Blue */
-        }
-        .add-expert-button:active {
-            background-color: #007bb5; /* Darker blue */
-        }
-        #current_expert, #sys_name {
-            font-weight: bold;
-        }
-    </style>
+    <link rel="stylesheet" href="style.css">
     <!-- jQuery and jQuery UI -->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>

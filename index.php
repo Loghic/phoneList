@@ -252,7 +252,7 @@ $systems = $systemsStmt->get_result();
                 type: 'POST',
                 data: $("#edit-form").serialize(),
                 success: function(response) {
-                    if (response.trim() === "Expert details updated successfully.") { // Assuming "Success" is the expected response for a successful save
+                    if (response.trim() === "Expert details and assignment updated successfully.") { // Assuming "Success" is the expected response for a successful save
                         alert("Expert details updated successfully.");
                         
                         // Update the #current_expert span with the new expert's name

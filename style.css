@@ -1,4 +1,3 @@
-style.css */
 body {
     font-family: Arial, sans-serif;
     margin: 20px;
@@ -8,24 +7,23 @@ h1, h2 {
     text-align: center;
 }
 
-table {
+.table {
     width: 100%;
-    border-collapse: collapse;
     margin: 20px 0;
 }
 
-th, td {
+.table th, .table td {
     padding: 12px;
     text-align: left;
-    border: 1px solid #ddd; /* Add border to cells */
+    border: 1px solid #ddd;
 }
 
-th {
-    background-color: #f4f4f4; /* Light gray background for header */
+.table th {
+    background-color: #f4f4f4;
 }
 
-tr:nth-child(even) {
-    background-color: #f9f9f9; /* Alternate row background color */
+.table tr:nth-child(even) {
+    background-color: #f9f9f9;
 }
 
 button {
@@ -33,7 +31,7 @@ button {
 }
 
 #assign-experts-button {
-    background-color: #008CBA; /* Blue */
+    background-color: #008CBA;
     color: white;
     padding: 10px 20px;
     border: none;
@@ -43,12 +41,11 @@ button {
 }
 
 #assign-experts-button:hover {
-    background-color: #007bb5; /* Darker blue */
+    background-color: #007bb5;
 }
 
-.edit-button, .add-expert-button {
-    background-color: #4CAF50; /* Green */
-    border: none;
+.edit-button {
+    background-color: #4CAF50;
     color: white;
     padding: 5px 10px;
     text-align: center;
@@ -60,19 +57,58 @@ button {
 }
 
 .edit-button:active {
-    background-color: #45a049; /* Darker green */
+    background-color: #45a049;
 }
 
 .add-expert-button {
-    background-color: #008CBA; /* Blue */
+    background-color: #008CBA;
 }
 
 .add-expert-button:active {
-    background-color: #007bb5; /* Darker blue */
+    background-color: #007bb5;
 }
 
 #current_expert, #sys_name {
     font-weight: bold;
+}
+
+.ui-dialog .ui-dialog-titlebar {
+    background: #007bff;
+    color: white;
+}
+
+.ui-dialog .ui-dialog-title {
+    color: white;
+}
+
+.ui-dialog .ui-dialog-buttonpane {
+    text-align: center;
+}
+
+.ui-dialog .ui-dialog-buttonpane .ui-button {
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    margin: 0 5px;
+    border-radius: 5px;
+}
+
+.ui-dialog .ui-dialog-buttonpane .ui-button:hover {
+    background-color: #0056b3;
+}
+
+.ui-dialog .ui-dialog-buttonpane .ui-button:focus {
+    outline: none;
+}
+
+.ui-dialog .ui-dialog-buttonpane .ui-button.ui-state-focus {
+    box-shadow: 0 0 0 2px rgba(38, 143, 255, 0.6);
+}
+
+.ui-dialog .ui-dialog-buttonpane .ui-button.ui-state-disabled {
+    background-color: #c4c4c4;
+    cursor: not-allowed;
 }
 
 @media (max-width: 768px) {
@@ -101,6 +137,6 @@ button {
         padding-left: 10px;
         font-weight: bold;
         white-space: nowrap;
-        background-color: #f4f4f4; /* Match header background */
+        background-color: #f4f4f4;
     }
 }

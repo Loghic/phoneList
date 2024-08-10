@@ -20,88 +20,112 @@ $systems = $systemsStmt->get_result();
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telephone List Management</title>
-    <link rel="stylesheet" href="style.css">
-    <!-- jQuery and jQuery UI -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
+    <link rel="stylesheet" href="style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 </head>
 <body>
-    <h1>Telephone List Management</h1>
-    <h2>Assign Experts to Systems</h2>
-    <h2>Current Schedules</h2>
-    <button id="assign-experts-button">Assign Experts Randomly</button>
+    <div class="container mt-4">
+        <h1 class="text-center mb-4">Telephone List Management</h1>
+        <h2 class="text-center mb-4">Assign Experts to Systems</h2>
+        <h2 class="text-center mb-4">Current Schedules</h2>
+        <div class="text-center mb-4">
+            <button id="assign-experts-button" class="btn btn-primary">Assign Experts Randomly</button>
+        </div>
 
+        <div class="table-responsive">
+            <table class="table table-bordered table-striped">
+                <thead class="thead-light">
+                    <tr>
+                        <th>System</th>
+                        <th>Expert</th>
+                        <th>Phone</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <?php while ($system = $systems->fetch_assoc()): 
+                        $expert = getAssignedExpert($system['System_id'], $conn);
+                    ?>
+                        <tr>
+                            <td><?= htmlspecialchars($expert['system_name']) ?></td>
+                            <td><?= htmlspecialchars($expert['expert_name'] ?? 'N/A') ?></td>
+                            <td><?= htmlspecialchars($expert['phone'] ?? 'N/A') ?></td>
+                            <td>
+                                <a href="#" class="btn btn-success edit-button" data-system_id="<?= htmlspecialchars($system['System_id']) ?>">Edit</a>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                </tbody>
+            </table>
+        </div>
 
-    <table border="1">
-        <tr>
-            <th>System</th>
-            <th>Expert</th>
-            <th>Phone</th>
-            <th></th>
-        </tr>
-        <?php while ($system = $systems->fetch_assoc()): 
-            $expert = getAssignedExpert($system['System_id'], $conn);
-        ?>
-            <tr>
-                <td><?= htmlspecialchars($expert['system_name']) ?></td>
-                <td><?= htmlspecialchars($expert['expert_name'] ?? 'N/A') ?></td>
-                <td><?= htmlspecialchars($expert['phone'] ?? 'N/A') ?></td>
-                <td>
-                    <a href="#" class="edit-button" data-system_id="<?= htmlspecialchars($system['System_id']) ?>">Edit</a>
-                </td>
-            </tr>
-        <?php endwhile; ?>
-    </table>
+        <!-- Edit Dialog -->
+        <div id="edit-dialog" title="Edit Expert Assignment" style="display:none;">
+            <form id="edit-form">
+                <div class="form-group">
+                    <label for="system_name">System:</label>
+                    <span id="sys_name"></span>
+                </div>
+                <div class="form-group">
+                    <label for="expert_name">Current Expert:</label>
+                    <span id="current_expert"></span>
+                </div>
+                <div class="form-group">
+                    <label for="expert_select">Select New Expert:</label>
+                    <select id="expert_select" name="expert_id" class="form-control">
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone:</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" pattern="^\+?\d*$" placeholder="Enter phone number">
+                </div>
+                <input type="hidden" id="system_id" name="system_id">
+                <button type="button" id="add-expert-btn" class="btn btn-secondary">Add New Expert</button>
+                <button type="button" id="save-only-btn" class="btn btn-primary">Save</button>
+            </form>
+        </div>
 
-    <!-- Edit Dialog -->
-    <div id="edit-dialog" title="Edit Expert Assignment" style="display:none;">
-        <form id="edit-form">
-            <label for="system_name">System:</label><br>
-            <span id="sys_name"></span><br>
-            <label for="expert_name">Current Expert:</label><br>
-            <span id="current_expert"></span><br>
-            <label for="expert_select">Select New Expert:</label>
-            <select id="expert_select" name="expert_id">
-            </select><br>
-            <label for="phone">Phone:</label>
-            <input type="tel" id="phone" name="phone" pattern="^\+?\d*$" placeholder="Enter phone number"><br>
-            <input type="hidden" id="system_id" name="system_id">
-            <button type="button" id="add-expert-btn">Add New Expert</button>
-            <button type="button" id="save-only-btn">Save</button>
-        </form>
-    </div>
-
-    <!-- Add New Expert Dialog -->
-    <div id="add-expert-dialog" title="Add New Expert" style="display:none;">
-        <form id="add-expert-form">
-            <input type="hidden" id="system_id" name="system_id">
-            <label for="new_expert_name">Expert Name:</label>
-            <input type="text" id="new_expert_name" name="new_expert_name" required><br>
-            <label for="new_expert_phone">Phone:</label>
-            <input type="tel" id="new_expert_phone" name="new_expert_phone" pattern="^\+?\d*$" required><br>
-            <button type="button" id="save-and-add">Add Expert</button>
-        </form>
+        <!-- Add New Expert Dialog -->
+        <div id="add-expert-dialog" title="Add New Expert" style="display:none;">
+            <form id="add-expert-form">
+                <input type="hidden" id="system_id" name="system_id">
+                <div class="form-group">
+                    <label for="new_expert_name">Expert Name:</label>
+                    <input type="text" id="new_expert_name" name="new_expert_name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label for="new_expert_phone">Phone:</label>
+                    <input type="tel" id="new_expert_phone" name="new_expert_phone" class="form-control" pattern="^\+?\d*$" required>
+                </div>
+                <button type="button" id="save-and-add" class="btn btn-primary">Add Expert</button>
+            </form>
+        </div>
     </div>
 
     <script>
     $(document).ready(function() {
         $("#assign-experts-button").click(function() {
             $.ajax({
-                url: 'assign_experts.php', // PHP script to handle the expert assignment
+                url: 'assign_experts.php',
                 type: 'GET',
                 success: function(response) {
-                    alert(response); // Show success message
-                    location.reload(); // Reload the page to reflect changes
+                    alert(response);
+                    location.reload();
                 },
                 error: function(xhr, status, error) {
-                    alert("An error occurred: " + error); // Show error message
+                    alert("An error occurred: " + error);
                 }
             });
         });
+
         function refreshExpertDropdown(selectedExpertId) {
-            var systemId = $("#system_id").val(); // Get the current system ID
+            var systemId = $("#system_id").val();
 
             $.ajax({
                 url: 'get_experts.php',
@@ -110,16 +134,14 @@ $systems = $systemsStmt->get_result();
                 dataType: 'json',
                 success: function(data) {
                     var $expertSelect = $("#expert_select");
-                    $expertSelect.empty(); // Clear existing options
+                    $expertSelect.empty();
 
-                    // Populate the dropdown with experts
                     $.each(data.experts, function(index, expert) {
                         $expertSelect.append(
                             $('<option>', { value: expert.Id, text: expert.name })
                         );
                     });
 
-                    // Set the dropdown value to the selected expert's ID, if provided
                     if (selectedExpertId) {
                         $expertSelect.val(selectedExpertId);
                     }
@@ -139,39 +161,36 @@ $systems = $systemsStmt->get_result();
                         success: function(response) {
                             alert(response);
                             $("#edit-dialog").dialog("close");
-                            refreshExpertDropdown(); // Refresh the dropdown list after saving
-                            location.reload(); // Reload the page to reflect changes
+                            refreshExpertDropdown();
+                            location.reload();
                         }
                     });
                 },
                 "Cancel": function() {
                     $(this).dialog("close");
-                    location.reload(); // Reload the page to reflect changes
-                    }
+                    location.reload();
                 },
-                close: function(event, ui) {
-                    var systemId = $("#system_id").val();
-                    $.ajax({
-                        url: 'get_experts.php', // Create a separate PHP file to fetch the updated details
-                        type: 'GET',
-                        data: { system_id: systemId },
-                        success: function(response) {
-                            location.reload(); // Reload the page to reflect changes
-                        }
-                    });
-                }
-            });
+            },
+            classes: {
+                "ui-dialog": "my-dialog",
+                "ui-dialog-titlebar": "my-dialog-titlebar"
+            }
+        });
 
         $("#add-expert-dialog").dialog({
             autoOpen: false,
             modal: true,
             buttons: {
                 "Add and Exit": function() {
-                    $("#add-expert-form").submit(); // Submit the form and handle closing in the form's success callback
+                    $("#add-expert-form").submit();
                 },
                 "Cancel": function() {
                     $(this).dialog("close");
                 }
+            },
+            classes: {
+                "ui-dialog": "my-dialog",
+                "ui-dialog-titlebar": "my-dialog-titlebar"
             }
         });
 
@@ -185,27 +204,17 @@ $systems = $systemsStmt->get_result();
                 data: { system_id: systemId },
                 dataType: 'json',
                 success: function(data) {
-                    $("#system_name").val(data.expert.system_name);
+                    $("#system_name").text(data.expert.system_name);
                     $("#phone").val(data.expert.phone);
                     $("#system_id").val(systemId);
 
                     var selectedExpertId = data.expert.expert_id;
 
-                    console.log("Selected Expert ID:", selectedExpertId);
-
                     refreshExpertDropdown(selectedExpertId);
 
-                    // Set the dropdown value to the current expert's ID
-                    $("#expert_select").val(selectedExpertId);
-
-                    // sets Name of the system and current expert
                     $("#current_expert").text(data.expert.expert_name);
                     $("#sys_name").text(data.expert.system_name);
 
-                    // Update the current expert name field
-                    $("#expert_name").val(data.expert.expert_name);
-
-                    // Open the edit dialog
                     $("#edit-dialog").dialog("open");
                 }
             });
@@ -217,31 +226,24 @@ $systems = $systemsStmt->get_result();
                 type: 'POST',
                 data: $("#edit-form").serialize(),
                 success: function(response) {
-                    if (response.trim() === "Expert assignment and phone number updated successfully.") { // Assuming "Success" is the expected response for a successful save
+                    if (response.trim() === "Expert assignment and phone number updated successfully.") {
                         alert("Expert details updated successfully.");
-                        
-                        // Update the #current_expert span with the new expert's name
                         var newExpertName = $("#expert_select option:selected").text();
                         $("#current_expert").text(newExpertName);
-
-                        // Optionally, refresh form fields with the latest data from the server
                         $.ajax({
                             url: 'get_expert_details.php',
                             type: 'GET',
                             data: { system_id: $("#system_id").val() },
                             dataType: 'json',
                             success: function(data) {
-                                $("#system_name").val(data.expert.system_name);
+                                $("#system_name").text(data.expert.system_name);
                                 $("#phone").val(data.expert.phone);
-                                $("#expert_select").val(data.expert.expert_id); // Set dropdown to the expert's ID
+                                $("#expert_select").val(data.expert.expert_id);
                                 $("#expert_name").val(data.expert.expert_name);
                             }
                         });
                     } else {
-                        // Display the error message returned from the server
                         alert("Error: " + response);
-                        
-                        // Optionally, do not update the #current_expert span or form fields
                     }
                 },
                 error: function(xhr, status, error) {
@@ -251,8 +253,8 @@ $systems = $systemsStmt->get_result();
         });
 
         $("#add-expert-btn").click(function() {
-            var systemId = $("#system_id").val(); // Ensure this retrieves the correct system_id
-            $("#add-expert-form #system_id").val(systemId); // Set it in the add-expert-form
+            var systemId = $("#system_id").val();
+            $("#add-expert-form #system_id").val(systemId);
             $("#add-expert-dialog").dialog("open");
         });
 
@@ -265,8 +267,6 @@ $systems = $systemsStmt->get_result();
                 success: function(response) {
                     alert(response);
                     $("#add-expert-dialog").dialog("close");
-                    // Optionally, you might want to refresh the expert list or do other actions here
-                    // Refresh the expert dropdown in the edit dialog
                     refreshExpertDropdown();
                 },
                 error: function(xhr, status, error) {
@@ -282,8 +282,7 @@ $systems = $systemsStmt->get_result();
                 data: $("#add-expert-form").serialize(),
                 success: function(response) {
                     alert(response);
-                    refreshExpertDropdown(); // Refresh the expert list in the #edit-dialog
-                    // Keep the dialog open for adding more experts
+                    refreshExpertDropdown();
                 }
             });
         });
@@ -291,16 +290,14 @@ $systems = $systemsStmt->get_result();
         $("#expert_select").change(function() {
             var selectedExpertId = $(this).val();
             if (selectedExpertId === 'new') {
-                $("#expert_name").prop('readonly', false); // Allow editing if "Add New Expert" is selected
-                $("#phone").val(''); // Clear phone field for new expert
+                $("#expert_name").prop('readonly', false);
+                $("#phone").val('');
             } else {
-                $("#expert_name").prop('readonly', true); // Prevent editing if an existing expert is selected
+                $("#expert_name").prop('readonly', true);
                 $.ajax({
-                    url: 'get_expert_details.php', // New PHP file to fetch specific expert details
+                    url: 'get_expert_details.php',
                     type: 'GET',
-                    data: {
-                        expert_id: selectedExpertId
-                    },
+                    data: { expert_id: selectedExpertId },
                     dataType: 'json',
                     success: function(data) {
                         $("#expert_name").val(data.name);
@@ -313,3 +310,4 @@ $systems = $systemsStmt->get_result();
     </script>
 </body>
 </html>
+

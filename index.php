@@ -14,7 +14,6 @@ $systemsStmt = $conn->prepare("SELECT DISTINCT System_id FROM Expert_system_pers
 $systemsStmt->execute();
 $systems = $systemsStmt->get_result();
 
-
 // Function to get a randomly assigned expert for each system
 function getAssignedExpert($system_id, $conn) {
     // Fetch the system description and all experts associated with the given system_id
@@ -44,7 +43,7 @@ function getAssignedExpert($system_id, $conn) {
 
     // Randomly select an expert
     $random_expert = $experts[array_rand($experts)];
-
+    
     // Return expert details
     return [
         'system_name' => $random_expert['system_name'],
@@ -81,11 +80,8 @@ function getAssignedExpert($system_id, $conn) {
         .add-expert-button:active {
             background-color: #007bb5; /* Darker blue */
         }
-        #current_expert {
-        font-weight: bold;
-        }
-        #sys_name {
-        font-weight: bold;
+        #current_expert, #sys_name {
+            font-weight: bold;
         }
     </style>
     <!-- jQuery and jQuery UI -->
@@ -293,7 +289,6 @@ function getAssignedExpert($system_id, $conn) {
                     }
                 },
                 error: function(xhr, status, error) {
-                    // Handle unexpected errors here
                     alert("An unexpected error occurred: " + error);
                 }
             });
@@ -355,5 +350,3 @@ function getAssignedExpert($system_id, $conn) {
     </script>
 </body>
 </html>
-
-

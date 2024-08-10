@@ -237,18 +237,6 @@ function getAssignedExpert($system_id, $conn) {
             $("#add-expert-dialog").dialog("open");
         });
 
-        $("#save-and-add").click(function() {
-            $.ajax({
-                url: 'update_expert.php',
-                type: 'POST',
-                data: $("#edit-form").serialize(),
-                success: function(response) {
-                    alert(response);
-                    // The dialog remains open; only the data is saved
-                }
-            });
-        });
-
         $("#add-expert-form").submit(function(e) {
             e.preventDefault();
             $.ajax({
@@ -259,6 +247,19 @@ function getAssignedExpert($system_id, $conn) {
                     alert(response);
                     $("#add-expert-dialog").dialog("close");
                     refreshExpertDropdown(); // Refresh the expert list in the #edit-dialog
+                }
+            });
+        });
+
+        $("#save-and-add").click(function() {
+            $.ajax({
+                url: 'add_expert.php',
+                type: 'POST',
+                data: $("#add-expert-form").serialize(),
+                success: function(response) {
+                    alert(response);
+                    refreshExpertDropdown(); // Refresh the expert list in the #edit-dialog
+                    // Keep the dialog open for adding more experts
                 }
             });
         });

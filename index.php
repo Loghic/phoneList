@@ -228,6 +228,8 @@ $systems = $systemsStmt->get_result();
 
                     var selectedExpertId = data.expert.expert_id;
 
+                    console.log("Selected Expert ID:", selectedExpertId);
+
                     refreshExpertDropdown(selectedExpertId);
 
                     // Set the dropdown value to the current expert's ID

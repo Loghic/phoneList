@@ -5,12 +5,17 @@ $system_id = $_GET['system_id'];
 
 // Fetch the current expert details
 $stmt = $conn->prepare("
-    SELECT exp.Desc as system_name, e.name as expert_name, e.Private_phone as phone, e.Id as expert_id
-    FROM Expert_person e
-    JOIN Expert_system_person esp ON e.Id = esp.Person_id
-    JOIN Expert exp ON esp.System_id = exp.id
+    SELECT 
+    exp.Desc AS system_name,
+    COALESCE(e_assigned.name, e.name) AS expert_name,
+    COALESCE(e_assigned.Private_phone, e.Private_phone) AS phone,
+    COALESCE(exp.Assigned_expert_id, e.Id) AS expert_id
+    FROM Expert exp
+    LEFT JOIN Expert_person e_assigned ON exp.Assigned_expert_id = e_assigned.Id
+    JOIN Expert_system_person esp ON exp.id = esp.System_id
+    JOIN Expert_person e ON e.Id = esp.Person_id
     WHERE esp.System_id = ?
-    LIMIT 1
+    LIMIT 1;
 ");
 $stmt->bind_param("i", $system_id);
 $stmt->execute();

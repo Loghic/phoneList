@@ -15,7 +15,7 @@ if (!preg_match('/^\+?\d*$/', $phone)) {
     die("Invalid phone number format. It should start with an optional + followed by digits.");
 }
 
-// Update expert details
+// Update expert assignment
 $stmt = $conn->prepare("
     UPDATE Expert_system_person
     SET Person_id = ?
@@ -23,7 +23,7 @@ $stmt = $conn->prepare("
 ");
 $stmt->bind_param("ii", $expert_id, $system_id);
 if ($stmt->execute()) {
-    // Update phone number if a new expert is selected
+    // Update phone number only if a specific expert is selected
     if ($expert_id !== 'new') {
         $stmt = $conn->prepare("
             UPDATE Expert_person
@@ -31,11 +31,16 @@ if ($stmt->execute()) {
             WHERE Id = ?
         ");
         $stmt->bind_param("si", $phone, $expert_id);
-        $stmt->execute();
+        if ($stmt->execute()) {
+            echo "Expert details updated successfully.";
+        } else {
+            echo "Error updating phone number.";
+        }
+    } else {
+        echo "Expert assignment updated successfully.";
     }
-    echo "Expert details updated successfully.";
 } else {
-    echo "Error updating expert details.";
+    echo "Error updating expert assignment.";
 }
 
 $stmt->close();

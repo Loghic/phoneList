@@ -165,6 +165,7 @@ function getAssignedExpert($system_id, $conn) {
                         success: function(response) {
                             alert(response);
                             $("#edit-dialog").dialog("close");
+                            refreshExpertDropdown(); // Refresh the dropdown list after saving
                             location.reload(); // Reload the page to reflect changes
                         }
                     });

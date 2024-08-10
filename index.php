@@ -103,7 +103,7 @@ function getAssignedExpert($system_id, $conn) {
             <label for="phone">Phone:</label>
             <input type="tel" id="phone" name="phone" pattern="^\+?\d*$" placeholder="Enter phone number"><br>
             <input type="hidden" id="system_id" name="system_id">
-            <button type="submit">Save Changes</button>
+            <button type="button" id="save-only-btn">Save</button>
             <button type="button" id="add-expert-btn">Add New Expert</button>
         </form>
     </div>
@@ -125,8 +125,17 @@ function getAssignedExpert($system_id, $conn) {
                 autoOpen: false,
                 modal: true,
                 buttons: {
-                    "Save Changes": function() {
-                        $("#edit-form").submit();
+                    "Save and Exit": function() {
+                        $.ajax({
+                            url: 'update_expert.php',
+                            type: 'POST',
+                            data: $("#edit-form").serialize(),
+                            success: function(response) {
+                                alert(response);
+                                $("#edit-dialog").dialog("close");
+                                location.reload(); // Reload the page to reflect changes
+                            }
+                        });
                     },
                     "Cancel": function() {
                         $(this).dialog("close");
@@ -138,9 +147,6 @@ function getAssignedExpert($system_id, $conn) {
                 autoOpen: false,
                 modal: true,
                 buttons: {
-                    "Add Expert": function() {
-                        $("#add-expert-form").submit();
-                    },
                     "Cancel": function() {
                         $(this).dialog("close");
                     }
@@ -186,16 +192,14 @@ function getAssignedExpert($system_id, $conn) {
                 });
             });
 
-            $("#edit-form").submit(function(e) {
-                e.preventDefault();
+            $("#save-only-btn").click(function() {
                 $.ajax({
                     url: 'update_expert.php',
                     type: 'POST',
-                    data: $(this).serialize(),
+                    data: $("#edit-form").serialize(),
                     success: function(response) {
                         alert(response);
-                        $("#edit-dialog").dialog("close");
-                        location.reload(); // Reload the page to reflect changes
+                        // The dialog remains open; only the data is saved
                     }
                 });
             });
@@ -244,3 +248,5 @@ function getAssignedExpert($system_id, $conn) {
     </script>
 </body>
 </html>
+
+

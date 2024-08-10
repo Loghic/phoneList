@@ -22,18 +22,27 @@ $stmt->execute();
 $result = $stmt->get_result();
 $expert = $result->fetch_assoc();
 
-// Fetch all experts for the dropdown in ascending order
+// Debugging output
+error_log('Expert Data: ' . print_r($expert, true));
+
+// Fetch only experts associated with the given system
 $expertsStmt = $conn->prepare("
-    SELECT Id, name
-    FROM Expert_person
-    ORDER BY name ASC
+    SELECT e.Id, e.name
+    FROM Expert_person e
+    JOIN Expert_system_person esp ON e.Id = esp.Person_id
+    WHERE esp.System_id = ?
+    ORDER BY e.name ASC
 ");
+$expertsStmt->bind_param("i", $system_id);
 $expertsStmt->execute();
 $expertsResult = $expertsStmt->get_result();
 $experts = [];
 while ($row = $expertsResult->fetch_assoc()) {
     $experts[] = $row;
 }
+
+// Debugging output
+error_log('Experts List: ' . print_r($experts, true));
 
 // Create the response array
 $response = [
@@ -49,3 +58,4 @@ echo json_encode($response);
 $stmt->close();
 $expertsStmt->close();
 $conn->close();
+?>

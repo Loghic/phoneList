@@ -121,6 +121,31 @@ function getAssignedExpert($system_id, $conn) {
 
     <script>
         $(document).ready(function() {
+            function refreshExpertDropdown() {
+                var systemId = $("#system_id").val(); // Get the current system ID
+
+                $.ajax({
+                    url: 'get_experts.php',
+                    type: 'GET',
+                    data: { system_id: systemId },
+                    dataType: 'json',
+                    success: function(data) {
+                        var $expertSelect = $("#expert_select");
+                        $expertSelect.empty(); // Clear existing options
+                        $expertSelect.append('<option value="new">Add New Expert</option>'); // Option to add new expert
+
+                        // Populate the dropdown with experts
+                        $.each(data.experts, function(index, expert) {
+                            $expertSelect.append(
+                                $('<option>', { value: expert.Id, text: expert.name })
+                            );
+                        });
+
+                        // Optionally, set the dropdown to the newly added expert if applicable
+                        // Example: $expertSelect.val(newlyAddedExpertId);
+                    }
+                });
+            }
             $("#edit-dialog").dialog({
                 autoOpen: false,
                 modal: true,
@@ -139,7 +164,19 @@ function getAssignedExpert($system_id, $conn) {
                     },
                     "Cancel": function() {
                         $(this).dialog("close");
+                        location.reload(); // Reload the page to reflect changes
                     }
+                },
+                close: function(event, ui) {
+                    var systemId = $("#system_id").val();
+                    $.ajax({
+                        url: 'get_experts.php', // Create a separate PHP file to fetch the updated details
+                        type: 'GET',
+                        data: { system_id: systemId },
+                        success: function(response) {
+                            location.reload(); // Reload the page to reflect changes
+                        }
+                    });
                 }
             });
 
@@ -217,7 +254,7 @@ function getAssignedExpert($system_id, $conn) {
                     success: function(response) {
                         alert(response);
                         $("#add-expert-dialog").dialog("close");
-                        location.reload(); // Reload the page to reflect changes
+                        refreshExpertDropdown(); // Refresh the expert list in the #edit-dialog
                     }
                 });
             });

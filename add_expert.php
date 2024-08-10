@@ -9,6 +9,11 @@ if ($conn->connect_error) {
 $new_expert_name = $_POST['new_expert_name'];
 $new_expert_phone = $_POST['new_expert_phone'];
 
+// Validate phone number
+if (empty($new_expert_phone)) {
+    die("Phone number cannot be empty.");
+}
+
 // Validate phone number format
 if (!preg_match('/^\+?\d*$/', $new_expert_phone)) {
     die("Invalid phone number format. It should start with an optional + followed by digits.");

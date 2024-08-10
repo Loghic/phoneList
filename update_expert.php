@@ -11,6 +11,10 @@ $expert_id = $_POST['expert_id'];
 $phone = $_POST['phone'];
 
 // Validate phone number format
+if (empty($phone)) {
+    die("Phone number cannot be empty.");
+}
+
 if (!preg_match('/^\+?\d*$/', $phone)) {
     die("Invalid phone number format. It should start with an optional + followed by digits.");
 }

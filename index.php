@@ -22,6 +22,19 @@ $systems = $systemsStmt->get_result();
     <meta charset="UTF-8">
     <title>Telephone List Management</title>
     <style>
+        #assign-experts-button {
+            background-color: #008CBA; /* Blue */
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin: 10px 0;
+        }
+        #assign-experts-button:hover {
+            background-color: #007bb5; /* Darker blue */
+        }
         .edit-button, .add-expert-button {
             background-color: #4CAF50; /* Green */
             border: none;
@@ -56,6 +69,8 @@ $systems = $systemsStmt->get_result();
     <h1>Telephone List Management</h1>
     <h2>Assign Experts to Systems</h2>
     <h2>Current Schedules</h2>
+    <button id="assign-experts-button">Assign Experts Randomly</button>
+
 
     <table border="1">
         <tr>

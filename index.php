@@ -114,6 +114,7 @@ $systems = $systemsStmt->get_result();
     <!-- Add New Expert Dialog -->
     <div id="add-expert-dialog" title="Add New Expert" style="display:none;">
         <form id="add-expert-form">
+            <input type="hidden" id="system_id" name="system_id">
             <label for="new_expert_name">Expert Name:</label>
             <input type="text" id="new_expert_name" name="new_expert_name" required><br>
             <label for="new_expert_phone">Phone:</label>
@@ -288,6 +289,8 @@ $systems = $systemsStmt->get_result();
         });
 
         $("#add-expert-btn").click(function() {
+            var systemId = $("#system_id").val(); // Ensure this retrieves the correct system_id
+            $("#add-expert-form #system_id").val(systemId); // Set it in the add-expert-form
             $("#add-expert-dialog").dialog("open");
         });
 
@@ -300,7 +303,12 @@ $systems = $systemsStmt->get_result();
                 success: function(response) {
                     alert(response);
                     $("#add-expert-dialog").dialog("close");
-                    refreshExpertDropdown(); // Refresh the expert list in the #edit-dialog
+                    // Optionally, you might want to refresh the expert list or do other actions here
+                    // Refresh the expert dropdown in the edit dialog
+                    refreshExpertDropdown();
+                },
+                error: function(xhr, status, error) {
+                    alert("An error occurred: " + error);
                 }
             });
         });

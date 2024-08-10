@@ -120,7 +120,7 @@ function getAssignedExpert($system_id, $conn) {
 
     <script>
     $(document).ready(function() {
-        function refreshExpertDropdown() {
+        function refreshExpertDropdown(selectedExpertId) {
             var systemId = $("#system_id").val(); // Get the current system ID
 
             $.ajax({
@@ -138,7 +138,11 @@ function getAssignedExpert($system_id, $conn) {
                             $('<option>', { value: expert.Id, text: expert.name })
                         );
                     });
-                    $expertSelect.append('<option value="new">Add New Expert</option>'); // Option to add new expert
+
+                    // Set the dropdown value to the selected expert's ID, if provided
+                    if (selectedExpertId) {
+                        $expertSelect.val(selectedExpertId);
+                    }
                 }
             });
         }
@@ -204,9 +208,9 @@ function getAssignedExpert($system_id, $conn) {
                     $("#phone").val(data.expert.phone);
                     $("#system_id").val(systemId);
 
-                    refreshExpertDropdown();
-
                     var selectedExpertId = data.expert.expert_id;
+
+                    refreshExpertDropdown(selectedExpertId);
 
                     // Set the dropdown value to the current expert's ID
                     $("#expert_select").val(selectedExpertId);

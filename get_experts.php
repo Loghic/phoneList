@@ -44,4 +44,3 @@ echo json_encode($response);
 $stmt->close();
 $expertsStmt->close();
 $conn->close();
-?>

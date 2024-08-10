@@ -124,6 +124,19 @@ $systems = $systemsStmt->get_result();
 
     <script>
     $(document).ready(function() {
+        $("#assign-experts-button").click(function() {
+            $.ajax({
+                url: 'assign_experts.php', // PHP script to handle the expert assignment
+                type: 'GET',
+                success: function(response) {
+                    alert(response); // Show success message
+                    location.reload(); // Reload the page to reflect changes
+                },
+                error: function(xhr, status, error) {
+                    alert("An error occurred: " + error); // Show error message
+                }
+            });
+        });
         function refreshExpertDropdown(selectedExpertId) {
             var systemId = $("#system_id").val(); // Get the current system ID
 

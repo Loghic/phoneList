@@ -171,6 +171,9 @@ $systems = $systemsStmt->get_result();
                     location.reload();
                 },
             },
+            close: function() {
+                location.reload(); // Reload the page when dialog close button (X) is clicked
+            },
             classes: {
                 "ui-dialog": "my-dialog",
                 "ui-dialog-titlebar": "my-dialog-titlebar"

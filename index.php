@@ -98,7 +98,6 @@ function getAssignedExpert($system_id, $conn) {
             <input type="text" id="expert_name" name="expert_name" readonly><br>
             <label for="expert_select">Select New Expert:</label>
             <select id="expert_select" name="expert_id">
-                <!-- Options will be filled by jQuery -->
             </select><br>
             <label for="phone">Phone:</label>
             <input type="tel" id="phone" name="phone" pattern="^\+?\d*$" placeholder="Enter phone number"><br>
@@ -272,16 +271,15 @@ function getAssignedExpert($system_id, $conn) {
             } else {
                 $("#expert_name").prop('readonly', true); // Prevent editing if an existing expert is selected
                 $.ajax({
-                    url: 'get_experts.php',
+                    url: 'get_expert_details.php', // New PHP file to fetch specific expert details
                     type: 'GET',
                     data: {
-                        system_id: $("#system_id").val(),
                         expert_id: selectedExpertId
                     },
                     dataType: 'json',
                     success: function(data) {
-                        $("#expert_name").val(data.specific_expert.name);
-                        $("#phone").val(data.specific_expert.Private_phone);
+                        $("#expert_name").val(data.name);
+                        $("#phone").val(data.phone);
                     }
                 });
             }

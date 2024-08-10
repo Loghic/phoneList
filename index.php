@@ -103,8 +103,8 @@ function getAssignedExpert($system_id, $conn) {
             <label for="phone">Phone:</label>
             <input type="tel" id="phone" name="phone" pattern="^\+?\d*$" placeholder="Enter phone number"><br>
             <input type="hidden" id="system_id" name="system_id">
-            <button type="button" id="save-only-btn">Save</button>
             <button type="button" id="add-expert-btn">Add New Expert</button>
+            <button type="button" id="save-only-btn">Save</button>
         </form>
     </div>
 
@@ -115,7 +115,7 @@ function getAssignedExpert($system_id, $conn) {
             <input type="text" id="new_expert_name" name="new_expert_name" required><br>
             <label for="new_expert_phone">Phone:</label>
             <input type="tel" id="new_expert_phone" name="new_expert_phone" pattern="^\+?\d*$" required><br>
-            <button type="submit">Add Expert</button>
+            <button type="button" id="save-and-add">Add Expert</button>
         </form>
     </div>
 
@@ -132,7 +132,6 @@ function getAssignedExpert($system_id, $conn) {
                     success: function(data) {
                         var $expertSelect = $("#expert_select");
                         $expertSelect.empty(); // Clear existing options
-                        $expertSelect.append('<option value="new">Add New Expert</option>'); // Option to add new expert
 
                         // Populate the dropdown with experts
                         $.each(data.experts, function(index, expert) {
@@ -140,9 +139,6 @@ function getAssignedExpert($system_id, $conn) {
                                 $('<option>', { value: expert.Id, text: expert.name })
                             );
                         });
-
-                        // Optionally, set the dropdown to the newly added expert if applicable
-                        // Example: $expertSelect.val(newlyAddedExpertId);
                     }
                 });
             }
@@ -184,6 +180,9 @@ function getAssignedExpert($system_id, $conn) {
                 autoOpen: false,
                 modal: true,
                 buttons: {
+                    "Add and Exit": function() {
+                        $("#add-expert-form").submit(); // Submit the form and handle closing in the form's success callback
+                    },
                     "Cancel": function() {
                         $(this).dialog("close");
                     }
@@ -243,6 +242,18 @@ function getAssignedExpert($system_id, $conn) {
 
             $("#add-expert-btn").click(function() {
                 $("#add-expert-dialog").dialog("open");
+            });
+
+            $("#save-and-add").click(function() {
+                $.ajax({
+                    url: 'update_expert.php',
+                    type: 'POST',
+                    data: $("#edit-form").serialize(),
+                    success: function(response) {
+                        alert(response);
+                        // The dialog remains open; only the data is saved
+                    }
+                });
             });
 
             $("#add-expert-form").submit(function(e) {

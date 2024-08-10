@@ -95,6 +95,7 @@ button {
     cursor: pointer;
 }
 
+ /* cross addition to the dialog windows */
 .ui-dialog .ui-dialog-titlebar-close::before {
     content: '×'; /* Unicode character for the multiplication sign */
     font-size: 18px; /* Adjust size as needed */

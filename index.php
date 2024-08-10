@@ -57,6 +57,12 @@ function getAssignedExpert($system_id, $conn) {
         .add-expert-button:active {
             background-color: #007bb5; /* Darker blue */
         }
+        #current_expert {
+        font-weight: bold;
+        }
+        #sys_name {
+        font-weight: bold;
+        }
     </style>
     <!-- jQuery and jQuery UI -->
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
@@ -92,10 +98,10 @@ function getAssignedExpert($system_id, $conn) {
     <!-- Edit Dialog -->
     <div id="edit-dialog" title="Edit Expert Assignment" style="display:none;">
         <form id="edit-form">
-            <label for="system_name">System:</label>
-            <input type="text" id="system_name" name="system_name" readonly><br>
-            <label for="expert_name">Current Expert:</label>
-            <input type="text" id="expert_name" name="expert_name" readonly><br>
+            <label for="system_name">System:</label><br>
+            <span id="sys_name"></span><br>
+            <label for="expert_name">Current Expert:</label><br>
+            <span id="current_expert"></span><br>
             <label for="expert_select">Select New Expert:</label>
             <select id="expert_select" name="expert_id">
             </select><br>
@@ -215,6 +221,10 @@ function getAssignedExpert($system_id, $conn) {
                     // Set the dropdown value to the current expert's ID
                     $("#expert_select").val(selectedExpertId);
 
+                    // sets Name of the system and current expert
+                    $("#current_expert").text(data.expert.expert_name);
+                    $("#sys_name").text(data.expert.system_name);
+
                     // Update the current expert name field
                     $("#expert_name").val(data.expert.expert_name);
 
@@ -230,8 +240,36 @@ function getAssignedExpert($system_id, $conn) {
                 type: 'POST',
                 data: $("#edit-form").serialize(),
                 success: function(response) {
-                    alert(response);
-                    // The dialog remains open; only the data is saved
+                    if (response.trim() === "Expert details updated successfully.") { // Assuming "Success" is the expected response for a successful save
+                        alert("Expert details updated successfully.");
+                        
+                        // Update the #current_expert span with the new expert's name
+                        var newExpertName = $("#expert_select option:selected").text();
+                        $("#current_expert").text(newExpertName);
+
+                        // Optionally, refresh form fields with the latest data from the server
+                        $.ajax({
+                            url: 'get_expert_details.php',
+                            type: 'GET',
+                            data: { system_id: $("#system_id").val() },
+                            dataType: 'json',
+                            success: function(data) {
+                                $("#system_name").val(data.expert.system_name);
+                                $("#phone").val(data.expert.phone);
+                                $("#expert_select").val(data.expert.expert_id); // Set dropdown to the expert's ID
+                                $("#expert_name").val(data.expert.expert_name);
+                            }
+                        });
+                    } else {
+                        // Display the error message returned from the server
+                        alert("Error: " + response);
+                        
+                        // Optionally, do not update the #current_expert span or form fields
+                    }
+                },
+                error: function(xhr, status, error) {
+                    // Handle unexpected errors here
+                    alert("An unexpected error occurred: " + error);
                 }
             });
         });

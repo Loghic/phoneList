@@ -11,6 +11,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $expertPhone = $_POST['new_expert_phone'];
     $systemId = $_POST['system_id']; // System ID to associate with
 
+    // Validate phone number
+    if (empty($expertPhone)) {
+        die("Phone number cannot be empty.");
+    }
+
+    // Validate phone number format
+    if (!preg_match('/^\+?\d*$/', $expertPhone)) {
+        die("Invalid phone number format. It should start with an optional + followed by digits.");
+    }
+
     // Insert new expert into Experts table
     $stmt = $conn->prepare("INSERT INTO Expert_person (name, Private_phone) VALUES (?, ?)");
     $stmt->bind_param("ss", $expertName, $expertPhone);

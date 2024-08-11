@@ -79,8 +79,8 @@ $systems = $systemsStmt->get_result();
                     <input type="tel" id="phone" name="phone" class="form-control" pattern="^\+?\d*$" placeholder="Enter phone number">
                 </div>
                 <input type="hidden" id="system_id" name="system_id">
-                <button type="button" id="add-expert-btn" class="btn btn-secondary">Add New Expert</button>
-                <button type="button" id="save-only-btn" class="btn btn-primary">Save</button>
+                <button type="button" id="add-expert-btn" class="btn btn-primary">Add New Expert</button>
+                <button type="button" id="save-only-btn" class="btn btn-success">Save</button>
             </form>
         </div>
 
@@ -143,26 +143,35 @@ $systems = $systemsStmt->get_result();
         }
 
         $("#edit-dialog").dialog({
+            width: 320,
             autoOpen: false,
             modal: true,
-            buttons: {
-                "Save and Exit": function() {
-                    $.ajax({
-                        url: 'update_expert.php',
-                        type: 'POST',
-                        data: $("#edit-form").serialize(),
-                        success: function(response) {
-                            alert(response);
-                            $("#edit-dialog").dialog("close");
-                            refreshExpertDropdown();
-                            location.reload();
-                        }
-                    });
+            buttons: { 
+                "Save and Exit":{ 
+                    text: "Save and Exit",
+                    class: "save-exit-button",
+                    click: function() {
+                        $.ajax({
+                            url: 'update_expert.php',
+                            type: 'POST',
+                            data: $("#edit-form").serialize(),
+                            success: function(response) {
+                                alert(response);
+                                $("#edit-dialog").dialog("close");
+                                refreshExpertDropdown();
+                                location.reload();
+                            }
+                        });
+                    }
                 },
-                "Cancel": function() {
-                    $(this).dialog("close");
-                    location.reload();
-                },
+                "Cancel": {
+                    text: "Cancel",
+                    class: "cancel-button", 
+                    click: function() {
+                        $(this).dialog("close");
+                        location.reload();
+                    }
+                }
             },
             close: function() {
                 location.reload(); // Reload the page when dialog close button (X) is clicked
@@ -174,14 +183,23 @@ $systems = $systemsStmt->get_result();
         });
 
         $("#add-expert-dialog").dialog({
+            width: 320,
             autoOpen: false,
             modal: true,
             buttons: {
-                "Add and Exit": function() {
+                "Add and Exit": {
+                    text: "Add and Exit",
+                    class: "add-exit-button", 
+                    click: function() {
                     $("#add-expert-form").submit();
+                    }
                 },
-                "Cancel": function() {
+                "Cancel": {
+                    text: "Cancel",
+                    class: "cancel-button", 
+                    click:function() {
                     $(this).dialog("close");
+                    }
                 }
             },
             classes: {

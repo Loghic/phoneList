@@ -145,30 +145,40 @@ button {
     text-align: center;
 }
 
-.ui-dialog .ui-dialog-buttonpane .ui-button {
-    background-color: #007bff;
+.ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset { 
+    width: 100%; /* Ensure button set takes full width */
+    display: flex;
+    justify-content: space-between; /* Center buttons horizontally */
+}
+
+/* General button styles */
+.save-exit-button, .add-exit-button, .cancel-button {
+    padding: 3px; /* Add more padding for larger buttons */
+    border-radius: 5px; /* Maintain rounded corners */
+    border: none; /* Remove border */
+    margin: 0; /* Space between buttons */
     color: white;
-    border: none;
-    padding: 10px 20px;
-    margin: 0 5px;
-    border-radius: 5px;
+    flex: 1;
 }
 
-.ui-dialog .ui-dialog-buttonpane .ui-button:hover {
-    background-color: #0056b3;
+/* Styling for Save and Exit button && for Add and Exit button*/
+.save-exit-button, .add-exit-button{
+    background-color: #28a745; /* Green background */
+    margin-right: auto;
 }
 
-.ui-dialog .ui-dialog-buttonpane .ui-button:focus {
-    outline: none;
+.save-exit-button:hover .add-exit-button:hover{
+    background-color: #218838; /* Darker green on hover */
 }
 
-.ui-dialog .ui-dialog-buttonpane .ui-button.ui-state-focus {
-    box-shadow: 0 0 0 2px rgba(38, 143, 255, 0.6);
+/* Styling for Cancel button */
+.cancel-button {
+    background-color: #dc3545; /* Red background */
+    margin-left: auto;
 }
 
-.ui-dialog .ui-dialog-buttonpane .ui-button.ui-state-disabled {
-    background-color: #c4c4c4;
-    cursor: not-allowed;
+.cancel-button:hover {
+    background-color: #c82333; /* Darker red on hover */
 }
 
 /* Responsive Styles */

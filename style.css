@@ -191,7 +191,11 @@ button {
 }
 
 @media (max-width: 768px) {
-    .header-row, .data-row {
+    .header-row{
+        display: none;
+    }
+
+    .data-row {
         flex-direction: column;
         border-bottom: 1px solid black; /* Solid black border around each block */
     }
@@ -207,5 +211,23 @@ button {
 
     .data-row:last-child .cell {
         border-bottom: none; /* Remove bottom border from the last cell */
+    }
+
+    /* Target the text before the content in each cell on small screens */
+    .data-row .cell::before {
+        font-weight: bold;
+    }
+
+    /* Specific label text for each cell */
+    .data-row .cell:nth-child(1)::before {
+        content: "System: ";
+    }
+
+    .data-row .cell:nth-child(2)::before {
+        content: "Expert: ";
+    }
+
+    .data-row .cell:nth-child(3)::before {
+        content: "Phone: ";
     }
 }

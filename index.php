@@ -38,32 +38,25 @@ $systems = $systemsStmt->get_result();
             <button id="assign-experts-button" class="btn btn-primary">Assign Experts Randomly</button>
         </div>
 
-        <div class="table-responsive">
-            <table class="table table-bordered table-striped">
-                <thead class="thead-light">
-                    <tr>
-                        <th>System</th>
-                        <th>Expert</th>
-                        <th>Phone</th>
-                        <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php while ($system = $systems->fetch_assoc()): 
-                        $expert = getAssignedExpert($system['System_id'], $conn);
-                    ?>
-                        <tr>
-                            <td><?= htmlspecialchars($expert['system_name']) ?></td>
-                            <td><?= htmlspecialchars($expert['expert_name'] ?? 'N/A') ?></td>
-                            <td><?= htmlspecialchars($expert['phone'] ?? 'N/A') ?></td>
-                            <td>
-                                <a href="#" class="btn btn-success edit-button" data-system_id="<?= htmlspecialchars($system['System_id']) ?>">Edit</a>
-                            </td>
-                        </tr>
-                    <?php endwhile; ?>
-                </tbody>
-            </table>
+        <div class="header-row">
+            <div class="cell">System</div>
+            <div class="cell">Expert</div>
+            <div class="cell">Phone</div>
+            <div class="cell">Actions</div>
         </div>
+
+        <?php while ($system = $systems->fetch_assoc()): 
+            $expert = getAssignedExpert($system['System_id'], $conn);
+        ?>
+        <div class="data-row">
+            <div class="cell"><?= htmlspecialchars($expert['system_name']) ?></div>
+            <div class="cell"><?= htmlspecialchars($expert['expert_name'] ?? 'N/A') ?></div>
+            <div class="cell"><?= htmlspecialchars($expert['phone'] ?? 'N/A') ?></div>
+            <div class="cell">
+                <a href="#" class="btn btn-success edit-button action-button" data-system_id="<?= htmlspecialchars($system['System_id']) ?>">Edit</a>
+            </div>
+        </div>
+        <?php endwhile; ?>
 
         <!-- Edit Dialog -->
         <div id="edit-dialog" title="Edit Expert Assignment" style="display:none;">

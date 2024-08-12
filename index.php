@@ -7,13 +7,10 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Disable ONLY_FULL_GROUP_BY mode securely
-$conn->query("SET SESSION sql_mode=(SELECT REPLACE(@@SESSION.sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
-
 // Fetch distinct systems
-$systemsStmt = $conn->prepare("SELECT DISTINCT esp.System_id AS System_id, e.Desc AS System_name
+$systemsStmt = $conn->prepare("SELECT DISTINCT esp.System_id AS System_id, e.Desc AS System_name, e.Id AS id
                                 FROM Expert_system_person AS esp
-                                JOIN Expert e ON esp.System_id = e.Id
+                                RIGHT JOIN Expert e ON esp.System_id = e.Id
                                 ORDER BY System_name ASC");
 $systemsStmt->execute();
 $systems = $systemsStmt->get_result();
@@ -51,7 +48,7 @@ $systems = $systemsStmt->get_result();
         </div>
 
         <?php while ($system = $systems->fetch_assoc()): 
-            $expert = getAssignedExpert($system['System_id'], $conn);
+            $expert = getAssignedExpert($system['id'], $conn);
         ?>
         <div class="data-row">
             <div class="cell">

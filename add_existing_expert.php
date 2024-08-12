@@ -3,7 +3,10 @@ include 'dbConnection.php';
 
 // Error handling for database connection
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    die(json_encode([
+        'status' => 'error',
+        'message' => "Connection failed: " . $conn->connect_error
+    ]));
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -13,10 +16,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Validate phone number
     if (empty($phone)) {
-        die("Phone number cannot be empty.");
+        die(json_encode([
+            'status' => 'error',
+            'message' => "Phone number cannot be empty."
+        ]));
     }
     if (!preg_match('/^\+?\d*$/', $phone)) {
-        die("Invalid phone number format. It should start with an optional + followed by digits.");
+        die(json_encode([
+            'status' => 'error',
+            'message' => "Invalid phone number format. It should start with an optional + followed by digits."
+        ]));
     }
 
     // Update the expert's phone number
@@ -31,7 +40,10 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $checkSystemStmt->store_result();
 
         if ($checkSystemStmt->num_rows === 0) {
-            die("Invalid system_id: No matching system found.");
+            die(json_encode([
+                'status' => 'error',
+                'message' => "Invalid system_id: No matching system found."
+            ]));
         }
 
         // Associate the expert with the system
@@ -40,20 +52,50 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         $associateStmt->bind_param("ii", $systemId, $expertId);
 
         if ($associateStmt->execute()) {
-            echo "Expert updated and assigned to the system successfully.";
+            // Fetch the updated expert data
+            $fetchExpertStmt = $conn->prepare("
+                SELECT 
+                    e.name AS expert_name, 
+                    e.Private_phone AS phone
+                FROM Expert_person e
+                WHERE e.Id = ?
+                LIMIT 1;
+            ");
+            $fetchExpertStmt->bind_param("i", $expertId);
+            $fetchExpertStmt->execute();
+            $result = $fetchExpertStmt->get_result();
+            $expert = $result->fetch_assoc();
+
+            $response = [
+                'status' => 'success',
+                'expert' => $expert,
+                'message' => "Expert updated and assigned to the system successfully."
+            ];
+
+            echo json_encode($response);
         } else {
-            die("Failed to associate the expert with the system: " . $associateStmt->error);
+            die(json_encode([
+                'status' => 'error',
+                'message' => "Failed to associate the expert with the system: " . $associateStmt->error
+            ]));
         }
 
         $associateStmt->close();
         $checkSystemStmt->close();
     } else {
-        die("Failed to update expert phone number: " . $updateExpertStmt->error);
+        die(json_encode([
+            'status' => 'error',
+            'message' => "Failed to update expert phone number: " . $updateExpertStmt->error
+        ]));
     }
 
     $updateExpertStmt->close();
     $conn->close();
+
 } else {
-    echo "Invalid request.";
+    echo json_encode([
+        'status' => 'error',
+        'message' => "Invalid request."
+    ]);
 }
 ?>

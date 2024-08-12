@@ -7,13 +7,10 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Disable ONLY_FULL_GROUP_BY mode securely
-$conn->query("SET SESSION sql_mode=(SELECT REPLACE(@@SESSION.sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
-
 // Fetch distinct systems
-$systemsStmt = $conn->prepare("SELECT DISTINCT esp.System_id AS System_id, e.Desc AS System_name
+$systemsStmt = $conn->prepare("SELECT DISTINCT esp.System_id AS System_id, e.Desc AS System_name, e.Id AS id
                                 FROM Expert_system_person AS esp
-                                JOIN Expert e ON esp.System_id = e.Id
+                                RIGHT JOIN Expert e ON esp.System_id = e.Id
                                 ORDER BY System_name ASC");
 $systemsStmt->execute();
 $systems = $systemsStmt->get_result();
@@ -26,6 +23,7 @@ $systems = $systemsStmt->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telephone List Management</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -37,8 +35,9 @@ $systems = $systemsStmt->get_result();
         <h1 class="text-center mb-4">Telephone List Management</h1>
         <h2 class="text-center mb-4">Assign Experts to Systems</h2>
         <h2 class="text-center mb-4">Current Schedules</h2>
-        <div class="text-center mb-4">
-            <button id="assign-experts-button" class="btn btn-primary">Assign Experts Randomly</button>
+        <div class="text-center mb-4 top-buttons">
+            <button id="assign-experts-button" class="btn btn-warning">Assign Experts Randomly</button>
+            <button id="assign-choose-experts-button" class="btn btn-success">Choose Assignment of Experts</button>
         </div>
 
         <div class="header-row">
@@ -49,7 +48,7 @@ $systems = $systemsStmt->get_result();
         </div>
 
         <?php while ($system = $systems->fetch_assoc()): 
-            $expert = getAssignedExpert($system['System_id'], $conn);
+            $expert = getAssignedExpert($system['id'], $conn);
         ?>
         <div class="data-row">
             <div class="cell">
@@ -66,6 +65,28 @@ $systems = $systemsStmt->get_result();
             </div>
         </div>
         <?php endwhile; ?>
+
+        <!-- Expert Assignment Dialog -->
+        <div id="exp-assignment-dialog" title="Edit Expert Assignment" style="display:none;">
+            <form id="exp-assignment">
+                <div class="form-group">
+                    <label for="assignment_expert_select" class="bold">Select Expert:</label>
+                    <select id="assignment_expert_select" name="assignment_expert_select" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="assignment_phone" class="bold">Phone:</label>
+                    <input type="tel" id="assignment_phone" name="assignment_phone" class="form-control" pattern="^\+?\d*$" placeholder="Enter phone number">
+                </div>
+                <div class="button-container">
+                    <button type="button" id="select-all-btn" class="btn btn-success">Select All Systems</button>
+                    <button type="button" id="clear-all-btn" class="btn btn-danger">Clear All Systems</button>
+                </div>
+                <div class="form-group">
+                    <label for="systems-container" class="bold">Select Systems:</label>
+                    <div id="systems-container"></div>
+                </div>
+            </form>
+        </div>
 
         <!-- Edit Dialog -->
         <div id="edit-dialog" title="Edit Expert Assignment" style="display:none;">
@@ -89,7 +110,7 @@ $systems = $systemsStmt->get_result();
                 </div>
                 <input type="hidden" id="system_id" name="system_id">
                 <div class="button-container">
-                <button type="button" id="add-existing-expert-btn" class="btn btn-primary">Add Existing Expert</button>
+                    <button type="button" id="add-existing-expert-btn" class="btn btn-primary">Add Existing Expert</button>
                     <button type="button" id="add-expert-btn" class="btn btn-secondary">Add New Expert</button>
                     <button type="button" id="save-only-btn" class="btn btn-success">Save</button>
                 </div>
@@ -203,6 +224,128 @@ $systems = $systemsStmt->get_result();
             });
         }
 
+        function populateSystemCheckboxes(systems, expertId, expertSystems) {
+            var $systemsContainer = $("#systems-container");
+            $systemsContainer.empty(); // Clear existing checkboxes
+
+            $.each(systems, function(index, system) {
+                var isChecked = false;
+                // Check if the selected expert is associated with the system
+                if (expertSystems[expertId] && expertSystems[expertId].includes(system.System_id)) {
+                    isChecked = true;
+                }
+                
+                // Append checkbox with Bootstrap classes
+                $systemsContainer.append(
+                    $('<div>').addClass('form-check').append(
+                        $('<input>', { 
+                            type: 'checkbox', 
+                            name: 'system_ids[]', 
+                            value: system.System_id,
+                            checked: isChecked,
+                            class: 'form-check-input' // Bootstrap class for styling checkboxes
+                        }),
+                        $('<label>').text(system.System_name).addClass('form-check-label') // Bootstrap class for styling labels
+                    )
+                );
+            });
+        }
+
+
+        // Variable to store the selected expert ID
+        var selectedAssingmentExpertId = null;
+
+        $("#assign-choose-experts-button").click(function() {
+            $.ajax({
+                url: 'get_all_experts_and_systems.php', // Replace with your actual PHP endpoint
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    // Populate expert dropdown
+                    var $expertSelect = $("#assignment_expert_select");
+                    $expertSelect.empty(); // Clear existing options
+                    var phoneNumbers = {}; // To store phone numbers for each expert
+                    $.each(data.experts, function(index, expert) {
+                        $expertSelect.append(
+                            $('<option>', { value: expert.Id, text: expert.name })
+                        );
+                        phoneNumbers[expert.Id] = expert.Private_phone; // Store phone numbers
+                    });
+
+                    // Function to update phone number and checkboxes
+                    function updateExpertDetails(expertId) {
+                        var phoneNumber = phoneNumbers[expertId] || '';
+                        $("#assignment_phone").val(phoneNumber);
+                        populateSystemCheckboxes(data.systems, expertId, data.expert_systems);
+                    }
+
+                    // Set the first expert as the default selected option and update details
+                    if (data.experts.length > 0) {
+                        var firstExpertId = data.experts[0].Id;
+                        $expertSelect.val(firstExpertId);
+                        updateExpertDetails(firstExpertId);
+                    }
+
+                    // Handle change event on expert dropdown
+                    $expertSelect.change(function() {
+                        selectedAssingmentExpertId = $(this).val();
+                        populateSystemCheckboxes(data.systems, selectedAssingmentExpertId, data.expert_systems);
+                    });
+
+                    $("#exp-assignment-dialog").dialog("open");
+                },
+                error: function(xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        });
+
+        // Select all systems
+        $("#select-all-btn").click(function() {
+            $("#systems-container input[type='checkbox']").prop('checked', true);
+        });
+
+        // Clear all systems
+        $("#clear-all-btn").click(function() {
+            $("#systems-container input[type='checkbox']").prop('checked', false);
+        });
+
+        // Initialize the dialog
+        $("#exp-assignment-dialog").dialog({
+            width: 320,
+            autoOpen: false,
+            modal: true,
+            buttons: {
+                "Save Assignments":  {
+                    text: "Save And Exit",
+                    class: "save-exit-button",
+                    click: function(){
+                        $.ajax({
+                            url: 'save_expert_assignments.php', // Replace with your actual PHP endpoint
+                            type: 'POST',
+                            data: $("#exp-assignment").serialize(), // Serialize the entire form data
+                            success: function(response) {
+                                alert(response);
+                                $("#exp-assignment-dialog").dialog("close");
+                            },
+                            error: function(xhr, status, error) {
+                                alert("An error occurred: " + error);
+                            }
+                        });
+                    }
+                },
+                "Cancel": {
+                    text: "Cancel",
+                    class: "cancel-button",
+                    click: function() {
+                        $(this).dialog("close");
+                    }
+                }
+            }
+        });
+
+
+
         $("#edit-dialog").dialog({
             width: 320,
             autoOpen: false,
@@ -258,7 +401,7 @@ $systems = $systemsStmt->get_result();
                 "Cancel": {
                     text: "Cancel",
                     class: "cancel-button", 
-                    click:function() {
+                    click: function() {
                     $(this).dialog("close");
                     }
                 }
@@ -422,6 +565,23 @@ $systems = $systemsStmt->get_result();
             });
         });
 
+        $("#assignment_expert_select").change(function() {
+            var selectedExpertId = $(this).val();
+            if (selectedExpertId === 'new') {
+                $("#assignment_phone").val('');
+            } else {
+                $.ajax({
+                    url: 'get_expert_details.php',
+                    type: 'GET',
+                    data: { expert_id: selectedExpertId },
+                    dataType: 'json',
+                    success: function(data) {
+                        $("#assignment_phone").val(data.phone);
+                    }
+                });
+            }
+        });
+
         $("#expert_select").change(function() {
             var selectedExpertId = $(this).val();
             if (selectedExpertId === 'new') {
@@ -445,10 +605,8 @@ $systems = $systemsStmt->get_result();
         $("#existing_expert_select").change(function() {
             var selectedExpertId = $(this).val();
             if (selectedExpertId === 'new') {
-                $("#expert_name").prop('readonly', false);
-                $("#phone").val('');
+                $("#phone_existing").val('');
             } else {
-                $("#expert_name").prop('readonly', true);
                 $.ajax({
                     url: 'get_expert_details.php',
                     type: 'GET',

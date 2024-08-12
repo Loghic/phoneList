@@ -61,7 +61,8 @@ $systems = $systemsStmt->get_result();
             <div class="cell"><?= htmlspecialchars($expert['expert_name'] ?? '') ?></div>
             <div class="cell"><?= htmlspecialchars($expert['phone'] ?? '') ?></div>
             <div class="cell">
-                <a href="#" class="btn btn-success edit-button action-button" data-system_id="<?= htmlspecialchars($system['System_id']) ?>">Assign</a>
+                <a href="#" class="btn btn-success edit-button action-button"
+                data-system_id="<?= htmlspecialchars($system['System_id']) ?>">Assign</a>
             </div>
         </div>
         <?php endwhile; ?>
@@ -87,8 +88,11 @@ $systems = $systemsStmt->get_result();
                     <input type="tel" id="phone" name="phone" class="form-control" pattern="^\+?\d*$" placeholder="Enter phone number">
                 </div>
                 <input type="hidden" id="system_id" name="system_id">
-                <button type="button" id="add-expert-btn" class="btn btn-primary">Add New Expert</button>
-                <button type="button" id="save-only-btn" class="btn btn-success">Save</button>
+                <div class="button-container">
+                <button type="button" id="add-existing-expert-btn" class="btn btn-primary">Add Existing Expert</button>
+                    <button type="button" id="add-expert-btn" class="btn btn-secondary">Add New Expert</button>
+                    <button type="button" id="save-only-btn" class="btn btn-success">Save</button>
+                </div>
             </form>
         </div>
 
@@ -97,6 +101,10 @@ $systems = $systemsStmt->get_result();
             <form id="add-expert-form">
                 <input type="hidden" id="system_id" name="system_id">
                 <div class="form-group">
+                    <label for="system_name">System:</label>
+                    <span id="sys_name"></span>
+                </div>
+                <div class="form-group">
                     <label for="new_expert_name">Expert Name:</label>
                     <input type="text" id="new_expert_name" name="new_expert_name" class="form-control" required>
                 </div>
@@ -104,7 +112,6 @@ $systems = $systemsStmt->get_result();
                     <label for="new_expert_phone">Phone:</label>
                     <input type="tel" id="new_expert_phone" name="new_expert_phone" class="form-control" pattern="^\+?\d*$" required>
                 </div>
-                <button type="button" id="save-and-add" class="btn btn-primary">Add Expert</button>
             </form>
         </div>
     </div>
@@ -276,7 +283,9 @@ $systems = $systemsStmt->get_result();
 
         $("#add-expert-btn").click(function() {
             var systemId = $("#system_id").val();
+            var systemName = $("#sys_name").text();
             $("#add-expert-form #system_id").val(systemId);
+            $("#add-expert-form #sys_name").text(systemName);
             $("#add-expert-dialog").dialog("open");
         });
 
@@ -293,18 +302,6 @@ $systems = $systemsStmt->get_result();
                 },
                 error: function(xhr, status, error) {
                     alert("An error occurred: " + error);
-                }
-            });
-        });
-
-        $("#save-and-add").click(function() {
-            $.ajax({
-                url: 'add_expert.php',
-                type: 'POST',
-                data: $("#add-expert-form").serialize(),
-                success: function(response) {
-                    alert(response);
-                    refreshExpertDropdown();
                 }
             });
         });

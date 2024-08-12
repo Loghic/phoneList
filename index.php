@@ -76,7 +76,7 @@ $systems = $systemsStmt->get_result();
                     <select id="assignment_expert_select" name="expert_id" class="form-control"></select>
                 </div>
                 <div class="form-group">
-                    <label for="assignemtn_phone">Phone:</label>
+                    <label for="assignment_phone">Phone:</label>
                     <input type="tel" id="assignment_phone" name="phone" class="form-control" pattern="^\+?\d*$" placeholder="Enter phone number">
                 </div>
                 <div class="form-group">
@@ -524,6 +524,23 @@ $systems = $systemsStmt->get_result();
             });
         });
 
+        $("#assignment_expert_select").change(function() {
+            var selectedExpertId = $(this).val();
+            if (selectedExpertId === 'new') {
+                $("#assignment_phone").val('');
+            } else {
+                $.ajax({
+                    url: 'get_expert_details.php',
+                    type: 'GET',
+                    data: { expert_id: selectedExpertId },
+                    dataType: 'json',
+                    success: function(data) {
+                        $("#assignment_phone").val(data.phone);
+                    }
+                });
+            }
+        });
+
         $("#expert_select").change(function() {
             var selectedExpertId = $(this).val();
             if (selectedExpertId === 'new') {
@@ -547,10 +564,8 @@ $systems = $systemsStmt->get_result();
         $("#existing_expert_select").change(function() {
             var selectedExpertId = $(this).val();
             if (selectedExpertId === 'new') {
-                $("#expert_name").prop('readonly', false);
-                $("#phone").val('');
+                $("#phone_existing").val('');
             } else {
-                $("#expert_name").prop('readonly', true);
                 $.ajax({
                     url: 'get_expert_details.php',
                     type: 'GET',

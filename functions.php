@@ -2,7 +2,7 @@
 // Function to get a randomly assigned expert for each system
 function getAssignedExpert($system_id, $conn) {
     $stmt = $conn->prepare("
-        SELECT exp.Desc AS system_name,
+        SELECT exp.Desc AS system_name, exp.Phone AS system_phone,
         IF(exp.Assigned_expert_id IS NOT NULL, e_assigned.name, e.name) AS expert_name,
         IF(exp.Assigned_expert_id IS NOT NULL, e_assigned.Private_phone, e.Private_phone) AS phone,
         IF(exp.Assigned_expert_id IS NOT NULL, e_assigned.Id, e.Id) AS expert_id

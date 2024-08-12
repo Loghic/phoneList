@@ -72,11 +72,11 @@ $systems = $systemsStmt->get_result();
         <div id="exp-assignment-dialog" title="Edit Expert Assignment" style="display:none;">
             <form id="exp-assignment">
                 <div class="form-group">
-                    <label for="assignment_expert_select" class= "bold">Select Expert:</label>
+                    <label for="assignment_expert_select" class="bold">Select Expert:</label>
                     <select id="assignment_expert_select" name="assignment_expert_select" class="form-control"></select>
                 </div>
                 <div class="form-group">
-                    <label for="assignment_phone" class= "bold">Phone:</label>
+                    <label for="assignment_phone" class="bold">Phone:</label>
                     <input type="tel" id="assignment_phone" name="assignment_phone" class="form-control" pattern="^\+?\d*$" placeholder="Enter phone number">
                 </div>
                 <div class="button-container">
@@ -84,7 +84,7 @@ $systems = $systemsStmt->get_result();
                     <button type="button" id="clear-all-btn" class="btn btn-danger">Clear All Systems</button>
                 </div>
                 <div class="form-group">
-                    <label for="systems-container" class= "bold">Select Systems:</label>
+                    <label for="systems-container" class="bold">Select Systems:</label>
                     <div id="systems-container"></div>
                 </div>
             </form>
@@ -310,7 +310,7 @@ $systems = $systemsStmt->get_result();
                     $.ajax({
                         url: 'save_expert_assignments.php', // Replace with your actual PHP endpoint
                         type: 'POST',
-                        data: $("assignment_expert_select").serialize(),
+                        data: $("#exp-assignment").serialize(), // Serialize the entire form data
                         success: function(response) {
                             alert(response);
                             $("#exp-assignment-dialog").dialog("close");
@@ -325,6 +325,7 @@ $systems = $systemsStmt->get_result();
                 }
             }
         });
+
 
 
         $("#edit-dialog").dialog({

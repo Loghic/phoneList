@@ -68,6 +68,24 @@ $systems = $systemsStmt->get_result();
         </div>
         <?php endwhile; ?>
 
+        <!-- Expert Assignment Dialog -->
+        <div id="exp-assignment-dialog" title="Edit Expert Assignment" style="display:none;">
+            <form id="exp-assignment">
+                <div class="form-group">
+                    <label for="assignment_expert_select">Select Expert:</label>
+                    <select id="assignment_expert_select" name="expert_id" class="form-control"></select>
+                </div>
+                <div class="form-group">
+                    <label for="assignemtn_phone">Phone:</label>
+                    <input type="tel" id="assignment_phone" name="phone" class="form-control" pattern="^\+?\d*$" placeholder="Enter phone number">
+                </div>
+                <div class="form-group">
+                    <label for="systems-container">Select Systems:</label>
+                    <div id="systems-container"></div>
+                </div>
+            </form>
+        </div>
+
         <!-- Edit Dialog -->
         <div id="edit-dialog" title="Edit Expert Assignment" style="display:none;">
             <form id="edit-form">
@@ -203,6 +221,68 @@ $systems = $systemsStmt->get_result();
                 }
             });
         }
+
+        $("#assign-choose-experts-button").click(function() {
+            $.ajax({
+                url: 'get_all_experts_and_systems.php', // Replace with your actual PHP endpoint
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                        // Populate expert dropdown
+                        var $expertSelect = $("#assignment_expert_select");
+                        $expertSelect.empty(); // Clear existing options
+                        $.each(data.experts, function(index, expert) {
+                            $expertSelect.append(
+                                $('<option>', { value: expert.Id, text: expert.name })
+                            );
+                        });
+
+                        // Populate system checkboxes
+                        var $systemsContainer = $("#systems-container");
+                        $systemsContainer.empty(); // Clear existing checkboxes
+                        $.each(data.systems, function(index, system) {
+                            $systemsContainer.append(
+                                $('<div>').append(
+                                    $('<input>', { type: 'checkbox', name: 'system_ids[]', value: system.Id }),
+                                    $('<label>').text(system.name)
+                                )
+                            );
+                        });
+
+                        $("#exp-assignment-dialog").dialog("open");
+                    },
+                    error: function(xhr, status, error) {
+                        alert("An error occurred: " + error);
+                    }
+            });
+        });
+
+        // Initialize the dialog
+        $("#exp-assignment-dialog").dialog({
+            width: 320,
+            autoOpen: false,
+            modal: true,
+            buttons: {
+                "Save Assignments": function() {
+                    $.ajax({
+                        url: 'save_expert_assignments.php', // Replace with your actual PHP endpoint
+                        type: 'POST',
+                        data: $("#assignemnt_exp-assignment").serialize(),
+                        success: function(response) {
+                            alert(response);
+                            $("#exp-assignment-dialog").dialog("close");
+                        },
+                        error: function(xhr, status, error) {
+                            alert("An error occurred: " + error);
+                        }
+                    });
+                },
+                "Cancel": function() {
+                    $(this).dialog("close");
+                }
+            }
+        });
+
 
         $("#edit-dialog").dialog({
             width: 320,

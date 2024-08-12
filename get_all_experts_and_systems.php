@@ -20,12 +20,11 @@ while ($row = $allExpertsResult->fetch_assoc()) {
     $response['experts'][] = $row;
 }
 
-// Fetch distinct systems
+// Fetch all systems from the Expert table
 $allSystemsStmt = $conn->prepare("
-    SELECT DISTINCT esp.System_id AS System_id, e.Desc AS System_name
-    FROM Expert_system_person AS esp
-    JOIN Expert e ON esp.System_id = e.Id
-    ORDER BY System_name ASC
+    SELECT e.Id AS System_id, e.Desc AS System_name
+    FROM Expert e
+    ORDER BY e.Desc ASC
 ");
 $allSystemsStmt->execute();
 $systemsResult = $allSystemsStmt->get_result();
@@ -40,7 +39,7 @@ $systemsStmt = $conn->prepare("
         e.Id AS expert_id,
         esp.System_id
     FROM Expert_person e
-    JOIN Expert_system_person esp ON e.Id = esp.Person_id
+    LEFT JOIN Expert_system_person esp ON e.Id = esp.Person_id
 ");
 $systemsStmt->execute();
 $systemsResult = $systemsStmt->get_result();
@@ -51,7 +50,9 @@ while ($row = $systemsResult->fetch_assoc()) {
     if (!isset($expertSystems[$expert_id])) {
         $expertSystems[$expert_id] = [];
     }
-    $expertSystems[$expert_id][] = $system_id;
+    if ($system_id !== null) {
+        $expertSystems[$expert_id][] = $system_id;
+    }
 }
 $response['expert_systems'] = $expertSystems;
 

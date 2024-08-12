@@ -116,6 +116,27 @@ $systems = $systemsStmt->get_result();
         </div>
     </div>
 
+    <!-- Add Existing Expert Dialog -->
+    <div id="add-existing-expert-dialog" title="Add Existing Expert" style="display:none;">
+            <form id="add-existing-expert-form">
+                <input type="hidden" id="system_id" name="system_id">
+                <div class="form-group">
+                    <label for="system_name">System:</label>
+                    <span id="sys_name"></span>
+                </div>
+                <div class="form-group">
+                    <label for="existing_expert_select">Select New Expert:</label>
+                    <select id="existing_expert_select" name="expert_id" class="form-control">
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="phone_existing">Phone:</label>
+                    <input type="tel" id="phone_existing" name="phone" class="form-control" pattern="^\+?\d*$" placeholder="Enter phone number">
+                </div>
+            </form>
+        </div>
+    </div>
+
     <script>
     $(document).ready(function() {
         $("#assign-experts-button").click(function() {
@@ -142,6 +163,31 @@ $systems = $systemsStmt->get_result();
                 dataType: 'json',
                 success: function(data) {
                     var $expertSelect = $("#expert_select");
+                    $expertSelect.empty();
+
+                    $.each(data.experts, function(index, expert) {
+                        $expertSelect.append(
+                            $('<option>', { value: expert.Id, text: expert.name })
+                        );
+                    });
+
+                    if (selectedExpertId) {
+                        $expertSelect.val(selectedExpertId);
+                    }
+                }
+            });
+        }
+
+        function refreshAllExpertDropdown(selectedExpertId) {
+            var systemId = $("#system_id").val();
+
+            $.ajax({
+                url: 'get_all_experts.php',
+                type: 'GET',
+                data: { system_id: systemId },
+                dataType: 'json',
+                success: function(data) {
+                    var $expertSelect = $("#existing_expert_select");
                     $expertSelect.empty();
 
                     $.each(data.experts, function(index, expert) {
@@ -223,6 +269,32 @@ $systems = $systemsStmt->get_result();
             }
         });
 
+        $("#add-existing-expert-dialog").dialog({
+            width: 320,
+            autoOpen: false,
+            modal: true,
+            buttons: {
+                "Add and Exit": {
+                    text: "Add and Exit",
+                    class: "add-exit-button", 
+                    click: function() {
+                    $("#add-existing-expert-form").submit();
+                    }
+                },
+                "Cancel": {
+                    text: "Cancel",
+                    class: "cancel-button", 
+                    click:function() {
+                    $(this).dialog("close");
+                    }
+                }
+            },
+            classes: {
+                "ui-dialog": "my-dialog",
+                "ui-dialog-titlebar": "my-dialog-titlebar"
+            }
+        });
+
         $(".edit-button").click(function(e) {
             e.preventDefault();
             var systemId = $(this).data("system_id");
@@ -281,6 +353,33 @@ $systems = $systemsStmt->get_result();
             });
         });
 
+        $("#add-existing-expert-btn").click(function() {
+            var systemId = $("#system_id").val();
+            var systemName = $("#sys_name").text();
+  
+            $.ajax({
+                url: 'get_all_experts.php',
+                type: 'GET',
+                data: { system_id: systemId },
+                dataType: 'json',
+                success: function(data) {
+                    // Populate the form fields with the data retrieved from the server
+                    $("#add-existing-expert-form #system_id").val(systemId);  // Set the system ID
+                    $("#add-existing-expert-form #sys_name").text(systemName);  // Set the system name
+                    $("#add-existing-expert-form #phone").val(data.expert.phone);  // Set the phone number
+
+                    // Populate the dropdown with the experts list (if needed)
+                    refreshAllExpertDropdown(data.expert.expert_id);
+
+                    // Open the dialog
+                    $("#add-existing-expert-dialog").dialog("open");
+                },
+                error: function(xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        });
+
         $("#add-expert-btn").click(function() {
             var systemId = $("#system_id").val();
             var systemName = $("#sys_name").text();
@@ -306,6 +405,23 @@ $systems = $systemsStmt->get_result();
             });
         });
 
+        $("#add-existing-expert-form").submit(function(e) {
+            e.preventDefault();
+            $.ajax({
+                url: 'add_expert.php',
+                type: 'POST',
+                data: $(this).serialize(),
+                success: function(response) {
+                    alert(response);
+                    $("#add-existing-expert-dialog").dialog("close");
+                    refreshExpertDropdown();
+                },
+                error: function(xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        });
+
         $("#expert_select").change(function() {
             var selectedExpertId = $(this).val();
             if (selectedExpertId === 'new') {
@@ -321,6 +437,25 @@ $systems = $systemsStmt->get_result();
                     success: function(data) {
                         $("#expert_name").val(data.name);
                         $("#phone").val(data.phone);
+                    }
+                });
+            }
+        });
+
+        $("#existing_expert_select").change(function() {
+            var selectedExpertId = $(this).val();
+            if (selectedExpertId === 'new') {
+                $("#expert_name").prop('readonly', false);
+                $("#phone").val('');
+            } else {
+                $("#expert_name").prop('readonly', true);
+                $.ajax({
+                    url: 'get_expert_details.php',
+                    type: 'GET',
+                    data: { expert_id: selectedExpertId },
+                    dataType: 'json',
+                    success: function(data) {
+                        $("#phone_existing").val(data.phone);
                     }
                 });
             }

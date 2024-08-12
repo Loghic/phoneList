@@ -222,40 +222,61 @@ $systems = $systemsStmt->get_result();
             });
         }
 
+        // Variable to store the selected expert ID
+        var selectedAssingmentExpertId = null;
+
         $("#assign-choose-experts-button").click(function() {
             $.ajax({
                 url: 'get_all_experts_and_systems.php', // Replace with your actual PHP endpoint
                 type: 'GET',
                 dataType: 'json',
                 success: function(data) {
-                        // Populate expert dropdown
-                        var $expertSelect = $("#assignment_expert_select");
-                        $expertSelect.empty(); // Clear existing options
-                        $.each(data.experts, function(index, expert) {
-                            $expertSelect.append(
-                                $('<option>', { value: expert.Id, text: expert.name })
-                            );
-                        });
+                    // Populate expert dropdown
+                    var $expertSelect = $("#assignment_expert_select");
+                    $expertSelect.empty(); // Clear existing options
+                    $.each(data.experts, function(index, expert) {
+                        $expertSelect.append(
+                            $('<option>', { value: expert.Id, text: expert.name })
+                        );
+                    });
 
-                        // Populate system checkboxes
-                        var $systemsContainer = $("#systems-container");
-                        $systemsContainer.empty(); // Clear existing checkboxes
-                        $.each(data.systems, function(index, system) {
-                            $systemsContainer.append(
-                                $('<div>').append(
-                                    $('<input>', { type: 'checkbox', name: 'system_ids[]', value: system.Id }),
-                                    $('<label>').text(system.name)
-                                )
-                            );
-                        });
+                    // Handle change event on expert dropdown
+                    $expertSelect.change(function() {
+                        selectedAssingmentExpertId = $(this).val();
+                        populateSystemCheckboxes(data.systems, selectedAssingmentExpertId, data.expert_systems);
+                    });
 
-                        $("#exp-assignment-dialog").dialog("open");
-                    },
-                    error: function(xhr, status, error) {
-                        alert("An error occurred: " + error);
-                    }
+                    $("#exp-assignment-dialog").dialog("open");
+                },
+                error: function(xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
             });
         });
+
+        function populateSystemCheckboxes(systems, expertId, expertSystems) {
+            var $systemsContainer = $("#systems-container");
+            $systemsContainer.empty(); // Clear existing checkboxes
+
+            $.each(systems, function(index, system) {
+                var isChecked = false;
+                // Check if the selected expert is associated with the system
+                if (expertSystems[expertId] && expertSystems[expertId].includes(system.System_id)) {
+                    isChecked = true;
+                }
+                $systemsContainer.append(
+                    $('<div>').append(
+                        $('<input>', { 
+                            type: 'checkbox', 
+                            name: 'system_ids[]', 
+                            value: system.System_id,
+                            checked: isChecked 
+                        }),
+                        $('<label>').text(system.System_name)
+                    )
+                );
+            });
+        }
 
         // Initialize the dialog
         $("#exp-assignment-dialog").dialog({
@@ -267,7 +288,7 @@ $systems = $systemsStmt->get_result();
                     $.ajax({
                         url: 'save_expert_assignments.php', // Replace with your actual PHP endpoint
                         type: 'POST',
-                        data: $("#assignemnt_exp-assignment").serialize(),
+                        data: $("assignment_expert_select").serialize(),
                         success: function(response) {
                             alert(response);
                             $("#exp-assignment-dialog").dialog("close");

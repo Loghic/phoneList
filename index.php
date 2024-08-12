@@ -37,8 +37,9 @@ $systems = $systemsStmt->get_result();
         <h1 class="text-center mb-4">Telephone List Management</h1>
         <h2 class="text-center mb-4">Assign Experts to Systems</h2>
         <h2 class="text-center mb-4">Current Schedules</h2>
-        <div class="text-center mb-4">
-            <button id="assign-experts-button" class="btn btn-primary">Assign Experts Randomly</button>
+        <div class="text-center mb-4 top-buttons">
+            <button id="assign-experts-button" class="btn btn-warning">Assign Experts Randomly</button>
+            <button id="assign-choose-experts-button" class="btn btn-success">Choose Assignment of Experts</button>
         </div>
 
         <div class="header-row">

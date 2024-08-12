@@ -262,18 +262,26 @@ $systems = $systemsStmt->get_result();
                     // Populate expert dropdown
                     var $expertSelect = $("#assignment_expert_select");
                     $expertSelect.empty(); // Clear existing options
+                    var phoneNumbers = {}; // To store phone numbers for each expert
                     $.each(data.experts, function(index, expert) {
                         $expertSelect.append(
                             $('<option>', { value: expert.Id, text: expert.name })
                         );
+                        phoneNumbers[expert.Id] = expert.Private_phone; // Store phone numbers
                     });
 
-                    // Set the first expert as the default selected option
+                    // Function to update phone number and checkboxes
+                    function updateExpertDetails(expertId) {
+                        var phoneNumber = phoneNumbers[expertId] || '';
+                        $("#assignment_phone").val(phoneNumber);
+                        populateSystemCheckboxes(data.systems, expertId, data.expert_systems);
+                    }
+
+                    // Set the first expert as the default selected option and update details
                     if (data.experts.length > 0) {
                         var firstExpertId = data.experts[0].Id;
                         $expertSelect.val(firstExpertId);
-                        // Populate checkboxes for the first expert
-                        populateSystemCheckboxes(data.systems, firstExpertId, data.expert_systems);
+                        updateExpertDetails(firstExpertId);
                     }
 
                     // Handle change event on expert dropdown
@@ -306,22 +314,30 @@ $systems = $systemsStmt->get_result();
             autoOpen: false,
             modal: true,
             buttons: {
-                "Save Assignments": function() {
-                    $.ajax({
-                        url: 'save_expert_assignments.php', // Replace with your actual PHP endpoint
-                        type: 'POST',
-                        data: $("#exp-assignment").serialize(), // Serialize the entire form data
-                        success: function(response) {
-                            alert(response);
-                            $("#exp-assignment-dialog").dialog("close");
-                        },
-                        error: function(xhr, status, error) {
-                            alert("An error occurred: " + error);
-                        }
-                    });
+                "Save Assignments":  {
+                    text: "Save And Exit",
+                    class: "save-exit-button",
+                    click: function(){
+                        $.ajax({
+                            url: 'save_expert_assignments.php', // Replace with your actual PHP endpoint
+                            type: 'POST',
+                            data: $("#exp-assignment").serialize(), // Serialize the entire form data
+                            success: function(response) {
+                                alert(response);
+                                $("#exp-assignment-dialog").dialog("close");
+                            },
+                            error: function(xhr, status, error) {
+                                alert("An error occurred: " + error);
+                            }
+                        });
+                    }
                 },
-                "Cancel": function() {
-                    $(this).dialog("close");
+                "Cancel": {
+                    text: "Cancel",
+                    class: "cancel-button",
+                    click: function() {
+                        $(this).dialog("close");
+                    }
                 }
             }
         });
@@ -383,7 +399,7 @@ $systems = $systemsStmt->get_result();
                 "Cancel": {
                     text: "Cancel",
                     class: "cancel-button", 
-                    click:function() {
+                    click: function() {
                     $(this).dialog("close");
                     }
                 }

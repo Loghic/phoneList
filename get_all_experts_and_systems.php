@@ -9,7 +9,7 @@ $response = [];
 
 // Fetch all experts, regardless of the system_id
 $allExpertsStmt = $conn->prepare("
-    SELECT e.Id, e.name
+    SELECT e.Id, e.name, e.Private_phone
     FROM Expert_person e
     ORDER BY e.name ASC
 ");

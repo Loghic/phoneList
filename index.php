@@ -576,7 +576,6 @@ $systems = $systemsStmt->get_result();
                 success: function(response) {
                     if (response.status === 'success') {
                         // Update the #edit-dialog with the new expert information
-                        $("#expert").text(response.expert.expert_name);
                         $("#phone").val(response.expert.phone);
                         
                         // If you have a dropdown, update it accordingly

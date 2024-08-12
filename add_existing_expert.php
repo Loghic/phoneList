@@ -1,7 +1,6 @@
 <?php
 include 'dbConnection.php';
 
-// Error handling for database connection
 if ($conn->connect_error) {
     die(json_encode([
         'status' => 'error',
@@ -30,11 +29,25 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Update the expert's phone number
     $updateExpertStmt = $conn->prepare("UPDATE Expert_person SET Private_phone = ? WHERE Id = ?");
+    if (!$updateExpertStmt) {
+        die(json_encode([
+            'status' => 'error',
+            'message' => "Failed to prepare statement: " . $conn->error
+        ]));
+    }
+
     $updateExpertStmt->bind_param("si", $phone, $expertId);
 
     if ($updateExpertStmt->execute()) {
         // Check if the systemId exists
         $checkSystemStmt = $conn->prepare("SELECT Id FROM Expert WHERE Id = ?");
+        if (!$checkSystemStmt) {
+            die(json_encode([
+                'status' => 'error',
+                'message' => "Failed to prepare statement: " . $conn->error
+            ]));
+        }
+
         $checkSystemStmt->bind_param("i", $systemId);
         $checkSystemStmt->execute();
         $checkSystemStmt->store_result();
@@ -47,8 +60,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
 
         // Associate the expert with the system
-        $associateStmt = $conn->prepare("INSERT INTO Expert_system_person (system_id, person_id) VALUES (?, ?)
+        $associateStmt = $conn->prepare("INSERT INTO Expert_system_person (system_id, person_id) VALUES (?, ?) 
                                         ON DUPLICATE KEY UPDATE person_id = VALUES(person_id)");
+        if (!$associateStmt) {
+            die(json_encode([
+                'status' => 'error',
+                'message' => "Failed to prepare statement: " . $conn->error
+            ]));
+        }
+
         $associateStmt->bind_param("ii", $systemId, $expertId);
 
         if ($associateStmt->execute()) {
@@ -56,11 +76,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $fetchExpertStmt = $conn->prepare("
                 SELECT 
                     e.name AS expert_name, 
-                    e.Private_phone AS phone
+                    e.Private_phone AS phone,
+                    e.Id AS expert_id
                 FROM Expert_person e
                 WHERE e.Id = ?
                 LIMIT 1;
             ");
+            if (!$fetchExpertStmt) {
+                die(json_encode([
+                    'status' => 'error',
+                    'message' => "Failed to prepare statement: " . $conn->error
+                ]));
+            }
+
             $fetchExpertStmt->bind_param("i", $expertId);
             $fetchExpertStmt->execute();
             $result = $fetchExpertStmt->get_result();

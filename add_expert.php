@@ -3,7 +3,11 @@ include 'dbConnection.php';
 
 // Error handling for database connection
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    echo json_encode([
+        'status' => 'error',
+        'message' => "Connection failed: " . $conn->connect_error
+    ]);
+    exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -13,12 +17,20 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     // Validate phone number
     if (empty($expertPhone)) {
-        die("Phone number cannot be empty.");
+        echo json_encode([
+            'status' => 'error',
+            'message' => "Phone number cannot be empty."
+        ]);
+        exit;
     }
 
     // Validate phone number format
     if (!preg_match('/^\+?\d*$/', $expertPhone)) {
-        die("Invalid phone number format. It should start with an optional + followed by digits.");
+        echo json_encode([
+            'status' => 'error',
+            'message' => "Invalid phone number format. It should start with an optional + followed by digits."
+        ]);
+        exit;
     }
 
     // Insert new expert into Experts table
@@ -28,35 +40,60 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if ($stmt->execute()) {
         $expertId = $stmt->insert_id; // Get the ID of the newly inserted expert
 
-        // Debugging: Check if the systemId exists
+        // Check if the systemId exists
         $checkSystemStmt = $conn->prepare("SELECT Id FROM Expert WHERE Id = ?");
         $checkSystemStmt->bind_param("i", $systemId);
         $checkSystemStmt->execute();
         $checkSystemStmt->store_result();
 
         if ($checkSystemStmt->num_rows === 0) {
-            echo "Invalid system_id: No matching system found.";
+            echo json_encode([
+                'status' => 'error',
+                'message' => "Invalid system_id: No matching system found."
+            ]);
             $stmt->close();
             $conn->close();
             exit;
         }
 
         // Associate the new expert with the system in Expert_system_person table
-        $stmt = $conn->prepare("INSERT INTO Expert_system_person (system_id, person_id) VALUES (?, ?)");
-        $stmt->bind_param("ii", $systemId, $expertId);
+        $assocStmt = $conn->prepare("INSERT INTO Expert_system_person (system_id, person_id) VALUES (?, ?)
+                                     ON DUPLICATE KEY UPDATE person_id = VALUES(person_id)");
+        $assocStmt->bind_param("ii", $systemId, $expertId);
 
-        if ($stmt->execute()) {
-            echo "New expert added and assigned successfully.";
+        if ($assocStmt->execute()) {
+            // Prepare the response
+            $response = [
+                'status' => 'success',
+                'expert' => [
+                    'expert_id' => $expertId,
+                    'expert_name' => $expertName,
+                    'phone' => $expertPhone
+                ],
+                'message' => "New expert added and assigned successfully."
+            ];
+            echo json_encode($response);
         } else {
-            echo "Failed to associate the expert with the system: " . $stmt->error;
+            echo json_encode([
+                'status' => 'error',
+                'message' => "Failed to associate the expert with the system: " . $assocStmt->error
+            ]);
         }
+
+        $assocStmt->close();
     } else {
-        echo "Failed to add new expert: " . $stmt->error;
+        echo json_encode([
+            'status' => 'error',
+            'message' => "Failed to add new expert: " . $stmt->error
+        ]);
     }
 
     $stmt->close();
     $conn->close();
 } else {
-    echo "Invalid request.";
+    echo json_encode([
+        'status' => 'error',
+        'message' => "Invalid request."
+    ]);
 }
 ?>

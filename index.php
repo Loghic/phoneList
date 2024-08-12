@@ -73,11 +73,11 @@ $systems = $systemsStmt->get_result();
             <form id="exp-assignment">
                 <div class="form-group">
                     <label for="assignment_expert_select">Select Expert:</label>
-                    <select id="assignment_expert_select" name="expert_id" class="form-control"></select>
+                    <select id="assignment_expert_select" name="assignment_expert_select" class="form-control"></select>
                 </div>
                 <div class="form-group">
                     <label for="assignment_phone">Phone:</label>
-                    <input type="tel" id="assignment_phone" name="phone" class="form-control" pattern="^\+?\d*$" placeholder="Enter phone number">
+                    <input type="tel" id="assignment_phone" name="assignment_phone" class="form-control" pattern="^\+?\d*$" placeholder="Enter phone number">
                 </div>
                 <div class="form-group">
                     <label for="systems-container">Select Systems:</label>

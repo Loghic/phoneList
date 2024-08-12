@@ -551,20 +551,31 @@ $systems = $systemsStmt->get_result();
 
         $("#add-expert-form").submit(function(e) {
             e.preventDefault();
+            
             $.ajax({
                 url: 'add_expert.php',
                 type: 'POST',
                 data: $(this).serialize(),
+                dataType: 'json',  // Expecting JSON response
                 success: function(response) {
-                    alert(response);
-                    $("#add-expert-dialog").dialog("close");
-                    refreshExpertDropdown();
+                    if (response.status === 'success') {
+                        // Update the dropdown with the new expert information
+                        refreshExpertDropdown(response.expert.expert_id);
+                        $("#phone").val(response.expert.phone);
+
+
+                        // Close the dialog
+                        $("#add-expert-dialog").dialog("close");
+                    } else {
+                        alert(response.message || "Failed to add expert. Please try again.");
+                    }
                 },
                 error: function(xhr, status, error) {
                     alert("An error occurred: " + error);
                 }
             });
         });
+
 
         $("#add-existing-expert-form").submit(function(e) {
             e.preventDefault();

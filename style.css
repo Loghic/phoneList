@@ -58,8 +58,15 @@ h1, h2 {
 }
 
 /* Button Styles */
-button {
-    font-size: 1rem;
+.button-container {
+    display: flex;
+    flex-direction: column; /* Arrange buttons in a column */
+    gap: 10px; /* Adds space between the buttons */
+    align-items: stretch; /* Makes all buttons stretch to the full width of the container */
+}
+
+.button-container .btn {
+    width: 100%; /* Makes each button fill the full width of the container */
 }
 
 #assign-experts-button {

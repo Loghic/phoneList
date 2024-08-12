@@ -26,6 +26,7 @@ $systems = $systemsStmt->get_result();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Telephone List Management</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.2/themes/smoothness/jquery-ui.css">
     <link rel="stylesheet" href="style.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -236,19 +237,23 @@ $systems = $systemsStmt->get_result();
                 if (expertSystems[expertId] && expertSystems[expertId].includes(system.System_id)) {
                     isChecked = true;
                 }
+                
+                // Append checkbox with Bootstrap classes
                 $systemsContainer.append(
-                    $('<div>').append(
+                    $('<div>').addClass('form-check').append(
                         $('<input>', { 
                             type: 'checkbox', 
                             name: 'system_ids[]', 
                             value: system.System_id,
-                            checked: isChecked 
+                            checked: isChecked,
+                            class: 'form-check-input' // Bootstrap class for styling checkboxes
                         }),
-                        $('<label>').text(system.System_name)
+                        $('<label>').text(system.System_name).addClass('form-check-label') // Bootstrap class for styling labels
                     )
                 );
             });
         }
+
 
         // Variable to store the selected expert ID
         var selectedAssingmentExpertId = null;

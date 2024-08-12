@@ -11,7 +11,7 @@ error_log('POST Data: ' . print_r($_POST, true));
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Check if the required POST variables are set
-    if (!isset($_POST['assignment_expert_select']) || !isset($_POST['assignment_phone']) || !isset($_POST['system_ids'])) {
+    if (!isset($_POST['assignment_expert_select']) || !isset($_POST['assignment_phone'])) {
         die("Missing required fields.");
     }
 

@@ -72,15 +72,19 @@ $systems = $systemsStmt->get_result();
         <div id="exp-assignment-dialog" title="Edit Expert Assignment" style="display:none;">
             <form id="exp-assignment">
                 <div class="form-group">
-                    <label for="assignment_expert_select">Select Expert:</label>
+                    <label for="assignment_expert_select" class= "bold">Select Expert:</label>
                     <select id="assignment_expert_select" name="assignment_expert_select" class="form-control"></select>
                 </div>
                 <div class="form-group">
-                    <label for="assignment_phone">Phone:</label>
+                    <label for="assignment_phone" class= "bold">Phone:</label>
                     <input type="tel" id="assignment_phone" name="assignment_phone" class="form-control" pattern="^\+?\d*$" placeholder="Enter phone number">
                 </div>
+                <div class="button-container">
+                    <button type="button" id="select-all-btn" class="btn btn-success">Select All Systems</button>
+                    <button type="button" id="clear-all-btn" class="btn btn-danger">Clear All Systems</button>
+                </div>
                 <div class="form-group">
-                    <label for="systems-container">Select Systems:</label>
+                    <label for="systems-container" class= "bold">Select Systems:</label>
                     <div id="systems-container"></div>
                 </div>
             </form>
@@ -108,7 +112,7 @@ $systems = $systemsStmt->get_result();
                 </div>
                 <input type="hidden" id="system_id" name="system_id">
                 <div class="button-container">
-                <button type="button" id="add-existing-expert-btn" class="btn btn-primary">Add Existing Expert</button>
+                    <button type="button" id="add-existing-expert-btn" class="btn btn-primary">Add Existing Expert</button>
                     <button type="button" id="add-expert-btn" class="btn btn-secondary">Add New Expert</button>
                     <button type="button" id="save-only-btn" class="btn btn-success">Save</button>
                 </div>
@@ -222,38 +226,6 @@ $systems = $systemsStmt->get_result();
             });
         }
 
-        // Variable to store the selected expert ID
-        var selectedAssingmentExpertId = null;
-
-        $("#assign-choose-experts-button").click(function() {
-            $.ajax({
-                url: 'get_all_experts_and_systems.php', // Replace with your actual PHP endpoint
-                type: 'GET',
-                dataType: 'json',
-                success: function(data) {
-                    // Populate expert dropdown
-                    var $expertSelect = $("#assignment_expert_select");
-                    $expertSelect.empty(); // Clear existing options
-                    $.each(data.experts, function(index, expert) {
-                        $expertSelect.append(
-                            $('<option>', { value: expert.Id, text: expert.name })
-                        );
-                    });
-
-                    // Handle change event on expert dropdown
-                    $expertSelect.change(function() {
-                        selectedAssingmentExpertId = $(this).val();
-                        populateSystemCheckboxes(data.systems, selectedAssingmentExpertId, data.expert_systems);
-                    });
-
-                    $("#exp-assignment-dialog").dialog("open");
-                },
-                error: function(xhr, status, error) {
-                    alert("An error occurred: " + error);
-                }
-            });
-        });
-
         function populateSystemCheckboxes(systems, expertId, expertSystems) {
             var $systemsContainer = $("#systems-container");
             $systemsContainer.empty(); // Clear existing checkboxes
@@ -277,6 +249,56 @@ $systems = $systemsStmt->get_result();
                 );
             });
         }
+
+        // Variable to store the selected expert ID
+        var selectedAssingmentExpertId = null;
+
+        $("#assign-choose-experts-button").click(function() {
+            $.ajax({
+                url: 'get_all_experts_and_systems.php', // Replace with your actual PHP endpoint
+                type: 'GET',
+                dataType: 'json',
+                success: function(data) {
+                    // Populate expert dropdown
+                    var $expertSelect = $("#assignment_expert_select");
+                    $expertSelect.empty(); // Clear existing options
+                    $.each(data.experts, function(index, expert) {
+                        $expertSelect.append(
+                            $('<option>', { value: expert.Id, text: expert.name })
+                        );
+                    });
+
+                    // Set the first expert as the default selected option
+                    if (data.experts.length > 0) {
+                        var firstExpertId = data.experts[0].Id;
+                        $expertSelect.val(firstExpertId);
+                        // Populate checkboxes for the first expert
+                        populateSystemCheckboxes(data.systems, firstExpertId, data.expert_systems);
+                    }
+
+                    // Handle change event on expert dropdown
+                    $expertSelect.change(function() {
+                        selectedAssingmentExpertId = $(this).val();
+                        populateSystemCheckboxes(data.systems, selectedAssingmentExpertId, data.expert_systems);
+                    });
+
+                    $("#exp-assignment-dialog").dialog("open");
+                },
+                error: function(xhr, status, error) {
+                    alert("An error occurred: " + error);
+                }
+            });
+        });
+
+        // Select all systems
+        $("#select-all-btn").click(function() {
+            $("#systems-container input[type='checkbox']").prop('checked', true);
+        });
+
+        // Clear all systems
+        $("#clear-all-btn").click(function() {
+            $("#systems-container input[type='checkbox']").prop('checked', false);
+        });
 
         // Initialize the dialog
         $("#exp-assignment-dialog").dialog({

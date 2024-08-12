@@ -8,6 +8,10 @@ h1, h2 {
     text-align: center;
 }
 
+.bold{
+    font-weight: bold;
+}
+
 /* Grid Layout Styles */
 .header-row, .data-row {
     display: flex;

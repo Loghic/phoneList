@@ -11,7 +11,10 @@ if ($conn->connect_error) {
 $conn->query("SET SESSION sql_mode=(SELECT REPLACE(@@SESSION.sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
 
 // Fetch distinct systems
-$systemsStmt = $conn->prepare("SELECT DISTINCT System_id FROM Expert_system_person");
+$systemsStmt = $conn->prepare("SELECT DISTINCT esp.System_id AS System_id, e.Desc AS System_name
+                                FROM Expert_system_person AS esp
+                                JOIN Expert e ON esp.System_id = e.Id
+                                ORDER BY System_name ASC");
 $systemsStmt->execute();
 $systems = $systemsStmt->get_result();
 ?>
@@ -42,18 +45,23 @@ $systems = $systemsStmt->get_result();
             <div class="cell">System</div>
             <div class="cell">Expert</div>
             <div class="cell">Phone</div>
-            <div class="cell">Actions</div>
+            <div class="cell"></div>
         </div>
 
         <?php while ($system = $systems->fetch_assoc()): 
             $expert = getAssignedExpert($system['System_id'], $conn);
         ?>
         <div class="data-row">
-            <div class="cell"><?= htmlspecialchars($expert['system_name']) ?></div>
-            <div class="cell"><?= htmlspecialchars($expert['expert_name'] ?? 'N/A') ?></div>
-            <div class="cell"><?= htmlspecialchars($expert['phone'] ?? 'N/A') ?></div>
             <div class="cell">
-                <a href="#" class="btn btn-success edit-button action-button" data-system_id="<?= htmlspecialchars($system['System_id']) ?>">Edit</a>
+                <?= htmlspecialchars($expert['system_name']) ?>
+                <?php if (!empty($expert['system_phone'])): ?>
+                    (<?= htmlspecialchars($expert['system_phone']) ?>)
+                <?php endif; ?>
+            </div>
+            <div class="cell"><?= htmlspecialchars($expert['expert_name'] ?? '') ?></div>
+            <div class="cell"><?= htmlspecialchars($expert['phone'] ?? '') ?></div>
+            <div class="cell">
+                <a href="#" class="btn btn-success edit-button action-button" data-system_id="<?= htmlspecialchars($system['System_id']) ?>">Assign</a>
             </div>
         </div>
         <?php endwhile; ?>

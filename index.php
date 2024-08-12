@@ -408,7 +408,7 @@ $systems = $systemsStmt->get_result();
         $("#add-existing-expert-form").submit(function(e) {
             e.preventDefault();
             $.ajax({
-                url: 'add_expert.php',
+                url: 'add_existing_expert.php',
                 type: 'POST',
                 data: $(this).serialize(),
                 success: function(response) {

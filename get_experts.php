@@ -22,9 +22,6 @@ $stmt->execute();
 $result = $stmt->get_result();
 $expert = $result->fetch_assoc();
 
-// Debugging output
-error_log('Expert Data: ' . print_r($expert, true));
-
 // Fetch only experts associated with the given system
 $expertsStmt = $conn->prepare("
     SELECT e.Id, e.name

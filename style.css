@@ -20,7 +20,7 @@ h1, h2 {
 
 .cell {
     border: 1px solid black; /* Solid black border around each cell */
-    padding: 10px; /* Add padding for spacing */
+    padding: 10px;
     box-sizing: border-box;
     flex: 1;
     text-align: left; /* Align text to the left */
@@ -78,6 +78,10 @@ h1, h2 {
     justify-content: center;
     gap: 10px;
     width: 100%;
+}
+
+.top-buttons .btn {
+    border-bottom: 2px solid black !important;
 }
 
 #assign-experts-button, #assign-choose-experts-button {
@@ -141,7 +145,7 @@ h1, h2 {
 
 .ui-dialog .ui-dialog-titlebar-close::before {
     content: '×'; /* Unicode character for the multiplication sign */
-    font-size: 18px; /* Adjust size as needed */
+    font-size: 18px; 
     color: white; /* Close button color */
     display: block;
     text-align: center;
@@ -166,9 +170,9 @@ h1, h2 {
 
 /* General button styles */
 .save-exit-button, .add-exit-button, .cancel-button {
-    padding: 3px; /* Add more padding for larger buttons */
+    padding: 3px; 
     border-radius: 5px; /* Maintain rounded corners */
-    border: none; /* Remove border */
+    border: none; 
     margin: 0; /* Space between buttons */
     color: white;
     flex: 1;
@@ -229,7 +233,7 @@ h1, h2 {
 
     .cell {
         border: 1px solid black; /* Solid black border around each cell */
-        margin: 0; /* Ensure cells fit within blocks */
+        margin: 0; /* Ensures cells fit within blocks */
     }
 
     .cell:not(:last-child) {

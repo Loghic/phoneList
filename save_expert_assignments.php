@@ -6,9 +6,6 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Debugging: Output the contents of $_POST
-error_log('POST Data: ' . print_r($_POST, true));
-
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Check if the required POST variables are set
     if (!isset($_POST['assignment_expert_select']) || !isset($_POST['assignment_phone'])) {

@@ -251,10 +251,6 @@ $systems = $systemsStmt->get_result();
             });
         }
 
-
-        // Variable to store the selected expert ID
-        var selectedAssingmentExpertId = null;
-
         $("#assign-choose-experts-button").click(function() {
             $.ajax({
                 url: 'get_all_experts_and_systems.php', // Replace with your actual PHP endpoint
@@ -285,10 +281,10 @@ $systems = $systemsStmt->get_result();
                         $expertSelect.val(firstExpertId);
                         updateExpertDetails(firstExpertId);
                     }
-
+                    
                     // Handle change event on expert dropdown
                     $expertSelect.change(function() {
-                        selectedAssingmentExpertId = $(this).val();
+                        var selectedAssingmentExpertId = $(this).val();
                         populateSystemCheckboxes(data.systems, selectedAssingmentExpertId, data.expert_systems);
                     });
 
@@ -321,7 +317,7 @@ $systems = $systemsStmt->get_result();
                     class: "save-exit-button",
                     click: function(){
                         $.ajax({
-                            url: 'save_expert_assignments.php', // Replace with your actual PHP endpoint
+                            url: 'save_expert_assignments.php', 
                             type: 'POST',
                             data: $("#exp-assignment").serialize(), // Serialize the entire form data
                             success: function(response) {

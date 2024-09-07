@@ -2,20 +2,30 @@
 // Function to get a randomly assigned expert for each system
 function getAssignedExpert($system_id, $conn) {
     $stmt = $conn->prepare("
-        SELECT exp.Desc AS system_name, exp.Phone AS system_phone,
-        IF(exp.Assigned_expert_id IS NOT NULL, e_assigned.name, e.name) AS expert_name,
-        IF(exp.Assigned_expert_id IS NOT NULL, e_assigned.Private_phone, e.Private_phone) AS phone,
-        IF(exp.Assigned_expert_id IS NOT NULL, e_assigned.Id, e.Id) AS expert_id
-        FROM Expert_system_person esp
-        JOIN Expert exp ON esp.System_id = exp.Id
+        SELECT 
+            exp.Desc AS system_name,
+            exp.Phone AS system_phone,
+            COALESCE(e_assigned.name, e.name) AS expert_name,
+            COALESCE(e_assigned.Private_phone, e.Private_phone) AS phone,
+            COALESCE(e_assigned.Id, e.Id) AS expert_id
+        FROM Expert exp
+        LEFT JOIN Expert_system_person esp ON exp.Id = esp.System_id
         LEFT JOIN Expert_person e_assigned ON exp.Assigned_expert_id = e_assigned.Id
-        JOIN Expert_person e ON e.Id = esp.Person_id
-        WHERE esp.System_id = ?
-        LIMIT 1;
+        LEFT JOIN Expert_person e ON esp.Person_id = e.Id
+        WHERE exp.Id = ?
+        LIMIT 1
     ");
+    
     $stmt->bind_param("i", $system_id);
+    
     $stmt->execute();
-    return $stmt->get_result()->fetch_assoc();
+    
+    $result = $stmt->get_result();
+    $expert = $result->fetch_assoc();
+    
+    $stmt->close();
+    
+    return $expert;
 }
 
 function assignExpertsRandomly($conn) {

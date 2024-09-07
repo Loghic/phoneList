@@ -11,9 +11,9 @@ if ($conn->connect_error) {
 $conn->query("SET SESSION sql_mode=(SELECT REPLACE(@@SESSION.sql_mode, 'ONLY_FULL_GROUP_BY', ''))");
 
 // Fetch distinct systems
-$systemsStmt = $conn->prepare("SELECT DISTINCT esp.System_id AS System_id, e.Desc AS System_name
+$systemsStmt = $conn->prepare("SELECT DISTINCT esp.System_id AS System_id, e.Desc AS System_name, e.Id AS id
                                 FROM Expert_system_person AS esp
-                                JOIN Expert e ON esp.System_id = e.Id
+                                RIGHT JOIN Expert e ON esp.System_id = e.Id
                                 ORDER BY System_name ASC");
 $systemsStmt->execute();
 $systems = $systemsStmt->get_result();
@@ -49,7 +49,7 @@ $systems = $systemsStmt->get_result();
         </div>
 
         <?php while ($system = $systems->fetch_assoc()): 
-            $expert = getAssignedExpert($system['System_id'], $conn);
+            $expert = getAssignedExpert($system['id'], $conn);
         ?>
         <div class="data-row">
             <div class="cell">
@@ -62,7 +62,7 @@ $systems = $systemsStmt->get_result();
             <div class="cell"><?= htmlspecialchars($expert['phone'] ?? '') ?></div>
             <div class="cell">
                 <a href="#" class="btn btn-success edit-button action-button"
-                data-system_id="<?= htmlspecialchars($system['System_id']) ?>">Assign</a>
+                data-system_id="<?= htmlspecialchars($system['id']) ?>">Assign</a>
             </div>
         </div>
         <?php endwhile; ?>
@@ -89,7 +89,7 @@ $systems = $systemsStmt->get_result();
                 </div>
                 <input type="hidden" id="system_id" name="system_id">
                 <div class="button-container">
-                <button type="button" id="add-existing-expert-btn" class="btn btn-primary">Add Existing Expert</button>
+                    <button type="button" id="add-existing-expert-btn" class="btn btn-primary">Add Existing Expert</button>
                     <button type="button" id="add-expert-btn" class="btn btn-secondary">Add New Expert</button>
                     <button type="button" id="save-only-btn" class="btn btn-success">Save</button>
                 </div>
@@ -252,7 +252,7 @@ $systems = $systemsStmt->get_result();
                     text: "Add and Exit",
                     class: "add-exit-button", 
                     click: function() {
-                    $("#add-expert-form").submit();
+                        $("#add-expert-form").submit();
                     }
                 },
                 "Cancel": {
@@ -305,19 +305,29 @@ $systems = $systemsStmt->get_result();
                 data: { system_id: systemId },
                 dataType: 'json',
                 success: function(data) {
-                    $("#system_name").text(data.expert.system_name);
-                    $("#phone").val(data.expert.phone);
                     $("#system_id").val(systemId);
+                    if (data.status === 'success') {
+                        $("#system_name").text(data.expert.system_name);
+                        $("#phone").val(data.expert.phone || ""); // Set to empty string if null
+                        $("#current_expert").text(data.expert.expert_name || "No expert assigned");
+                        $("#sys_name").text(data.expert.system_name);
+                        var selectedExpertId = data.expert.expert_id;
+                        refreshExpertDropdown(selectedExpertId);
+                    } else {
+                        // Handle case where no expert data is found
+                        $("#system_name").text("System not found");
+                        $("#phone").val(""); // Clear the phone field
+                        $("#current_expert").text("No expert assigned");
+                        $("#sys_name").text("No system name available");
+                        refreshExpertDropdown(null);
+                    }
 
-                    var selectedExpertId = data.expert.expert_id;
-
-                    refreshExpertDropdown(selectedExpertId);
-
-                    $("#current_expert").text(data.expert.expert_name);
-                    $("#sys_name").text(data.expert.system_name);
-
+                    // Open the dialog even if no data is found
                     $("#edit-dialog").dialog("open");
-                }
+            },
+            error: function(xhr, status, error) {
+                alert("An error occurred: " + error);
+            }
             });
         });
 
@@ -363,13 +373,21 @@ $systems = $systemsStmt->get_result();
                 data: { system_id: systemId },
                 dataType: 'json',
                 success: function(data) {
-                    // Populate the form fields with the data retrieved from the server
-                    $("#add-existing-expert-form #system_id").val(systemId);  // Set the system ID
-                    $("#add-existing-expert-form #sys_name").text(systemName);  // Set the system name
-                    $("#add-existing-expert-form #phone").val(data.expert.phone);  // Set the phone number
+                   // Check if the response status is 'success' or 'error'
+                   if (data.status === 'success') {
+                        // Populate the form fields with the data retrieved from the server
+                        $("#add-existing-expert-form #system_id").val(systemId);  // Set the system ID
+                        $("#add-existing-expert-form #sys_name").text(systemName);  // Set the system name
+                        $("#add-existing-expert-form #phone").val(data.expert.phone || '');  // Set the phone number
+                    } else {
+                        // Handle the case where no expert data was found
+                        $("#add-existing-expert-form #system_id").val(systemId);  // Set the system ID
+                        $("#add-existing-expert-form #sys_name").text(systemName);  // Set the system name
+                        $("#add-existing-expert-form #phone").val('');  // Clear the phone number
+                    }
 
                     // Populate the dropdown with the experts list (if needed)
-                    refreshAllExpertDropdown(data.expert.expert_id);
+                    refreshAllExpertDropdown(data.expert ? data.expert.expert_id : null);
 
                     // Open the dialog
                     $("#add-existing-expert-dialog").dialog("open");
@@ -390,14 +408,25 @@ $systems = $systemsStmt->get_result();
 
         $("#add-expert-form").submit(function(e) {
             e.preventDefault();
+
             $.ajax({
                 url: 'add_expert.php',
                 type: 'POST',
                 data: $(this).serialize(),
+                dataType: 'json',
                 success: function(response) {
-                    alert(response);
-                    $("#add-expert-dialog").dialog("close");
-                    refreshExpertDropdown();
+                     if (response.status === 'success') {
+                        // Update the dropdown with the new expert information
+                        refreshExpertDropdown(response.expert.expert_id);
+                        $("#phone").val(response.expert.phone);
+
+                        
+                        alert(response.message);
+                        // Close the dialog
+                        $("#add-expert-dialog").dialog("close");
+                    } else {
+                        alert(response.message || "Failed to add expert. Please try again.");
+                    }
                 },
                 error: function(xhr, status, error) {
                     alert("An error occurred: " + error);
@@ -407,14 +436,27 @@ $systems = $systemsStmt->get_result();
 
         $("#add-existing-expert-form").submit(function(e) {
             e.preventDefault();
+
             $.ajax({
                 url: 'add_existing_expert.php',
                 type: 'POST',
                 data: $(this).serialize(),
+                dataType: 'json',
                 success: function(response) {
-                    alert(response);
-                    $("#add-existing-expert-dialog").dialog("close");
-                    refreshExpertDropdown();
+                    console.log(response)
+                    
+                    if (response.status === 'success') {
+                        // Update the #edit-dialog with the new expert information
+                        $("#phone").val(response.expert.phone);
+                        
+                        // update dropdown accordingly
+                        refreshExpertDropdown(response.expert.expert_id);
+                        
+                        alert(response.message);
+                        $("#add-existing-expert-dialog").dialog("close");
+                    } else {
+                        alert(response.message || "Failed to update expert information. Please try again.");
+                    }
                 },
                 error: function(xhr, status, error) {
                     alert("An error occurred: " + error);

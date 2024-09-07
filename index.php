@@ -35,11 +35,11 @@ $systems = $systemsStmt->get_result();
 <body>
     <div class="container mt-4">
         <h1 class="text-center mb-4">Telephone List Management</h1>
-        <h2 class="text-center mb-4">Assign Experts to Systems</h2>
+        <h2 class="text-center mb-4">Assign Experts to the Systems</h2>
         <h2 class="text-center mb-4">Current Schedules</h2>
         <div class="text-center mb-4 top-buttons">
             <button id="assign-experts-button" class="btn btn-warning">Assign Experts Randomly</button>
-            <button id="assign-choose-experts-button" class="btn btn-success">Choose Assignment of Experts</button>
+            <button id="assign-choose-experts-button" class="btn btn-success">Choose Assignment of the Experts</button>
         </div>
 
         <div class="header-row">
@@ -53,15 +53,15 @@ $systems = $systemsStmt->get_result();
             $expert = getAssignedExpert($system['id'], $conn);
         ?>
         <div class="data-row">
-            <div class="cell">
+            <div class="cell cellSys">
                 <?= htmlspecialchars($expert['system_name']) ?>
                 <?php if (!empty($expert['system_phone'])): ?>
                     (<?= htmlspecialchars($expert['system_phone']) ?>)
                 <?php endif; ?>
             </div>
-            <div class="cell"><?= htmlspecialchars($expert['expert_name'] ?? '') ?></div>
-            <div class="cell"><?= htmlspecialchars($expert['phone'] ?? '') ?></div>
-            <div class="cell">
+            <div class="cell cellSys"><?= htmlspecialchars($expert['expert_name'] ?? '') ?></div>
+            <div class="cell cellSys"><?= htmlspecialchars($expert['phone'] ?? '') ?></div>
+            <div class="cell cellSys">
                 <a href="#" class="btn btn-success edit-button action-button"
                 data-system_id="<?= htmlspecialchars($system['id']) ?>">Assign</a>
             </div>
@@ -140,6 +140,11 @@ $systems = $systemsStmt->get_result();
 
     <script>
     $(document).ready(function() {
+        $("#assign-choose-experts-button").click(function() {
+            window.location.href = 'index_assign_experts.php'; // Replace with your URL
+        });
+
+
         $("#assign-experts-button").click(function() {
             $.ajax({
                 url: 'assign_experts.php',

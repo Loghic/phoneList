@@ -80,7 +80,7 @@ h1, h2 {
     border-bottom: 2px solid black !important;
 }
 
-#assign-experts-button, #assign-choose-experts-button {
+#assign-experts-button, #assign-choose-experts-button, #assign-choose-systems-button {
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
@@ -242,15 +242,27 @@ h1, h2 {
     }
 
     /* Specific label text for each cell */
-    .data-row .cell:nth-child(1)::before {
+    .data-row .cellSys:nth-child(1)::before {
         content: "System: ";
     }
 
-    .data-row .cell:nth-child(2)::before {
+    .data-row .cellSys:nth-child(2)::before {
         content: "Expert: ";
     }
 
-    .data-row .cell:nth-child(3)::before {
+    .data-row .cellSys:nth-child(3)::before {
         content: "Phone: ";
+    }
+
+    .data-row .cellExp:nth-child(1)::before {
+        content: "Name: ";
+    }
+
+    .data-row .cellExp:nth-child(2)::before {
+        content: "Phone: ";
+    }
+
+    .data-row .cellExp:nth-child(3)::before {
+        content: "No. Systems: ";
     }
 }

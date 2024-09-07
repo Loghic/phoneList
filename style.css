@@ -69,18 +69,24 @@ h1, h2 {
     width: 100%; /* Makes each button fill the full width of the container */
 }
 
-#assign-experts-button {
-    background-color: #008CBA;
-    color: white;
+.top-buttons{
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+}
+
+.top-buttons .btn {
+    border-bottom: 2px solid black !important;
+}
+
+#assign-experts-button, #assign-choose-experts-button {
     padding: 10px 20px;
     border: none;
     border-radius: 5px;
     cursor: pointer;
     margin: 10px 0;
-}
-
-#assign-experts-button:hover {
-    background-color: #007bb5;
+    width: 100%;
 }
 
 .edit-button {

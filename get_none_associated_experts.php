@@ -5,7 +5,7 @@ $system_id = $_GET['system_id'];
 
 // Fetch all experts that are NOT associated with the given system
 $expertsStmt = $conn->prepare("
-    SELECT e.Id, e.name
+    SELECT e.Id, e.name, e.Private_phone AS phone
     FROM Expert_person e
     LEFT JOIN Expert_system_person esp ON e.Id = esp.Person_id AND esp.System_id = ?
     WHERE esp.Person_id IS NULL
@@ -31,7 +31,8 @@ if (empty($experts)) {
     // Create the response array
     $response = [
         'status' => 'success',
-        'experts' => $experts
+        'experts' => $experts,
+        'expert' => $experts[0],
     ];
 }
 

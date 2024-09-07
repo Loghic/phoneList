@@ -37,8 +37,9 @@ $systems = $systemsStmt->get_result();
         <h1 class="text-center mb-4">Telephone List Management</h1>
         <h2 class="text-center mb-4">Assign Experts to Systems</h2>
         <h2 class="text-center mb-4">Current Schedules</h2>
-        <div class="text-center mb-4">
-            <button id="assign-experts-button" class="btn btn-primary">Assign Experts Randomly</button>
+        <div class="text-center mb-4 top-buttons">
+            <button id="assign-experts-button" class="btn btn-warning">Assign Experts Randomly</button>
+            <button id="assign-choose-experts-button" class="btn btn-success">Choose Assignment of Experts</button>
         </div>
 
         <div class="header-row">
@@ -374,16 +375,16 @@ $systems = $systemsStmt->get_result();
                 dataType: 'json',
                 success: function(data) {
                    // Check if the response status is 'success' or 'error'
-                   console.log(data);
                    if (data.status === 'success') {
                         // Populate the form fields with the data retrieved from the server
                         $("#add-existing-expert-form #system_id").val(systemId);  // Set the system ID
                         $("#add-existing-expert-form #sys_name").text(systemName);  // Set the system name
+                        $("#add-existing-expert-form #phone_existing").val(data.expert.phone || "");
                     } else {
                         // Handle the case where no expert data was found
                         $("#add-existing-expert-form #system_id").val(systemId);  // Set the system ID
                         $("#add-existing-expert-form #sys_name").text(systemName);  // Set the system name
-                        $("#add-existing-expert-form #phone").val('');  // Clear the phone number
+                        $("#add-existing-expert-form #phone_existing").val("");  // Clear the phone number
                     }
 
                     // Populate the dropdown with the experts list (if needed)

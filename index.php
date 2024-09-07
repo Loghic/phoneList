@@ -178,11 +178,11 @@ $systems = $systemsStmt->get_result();
             });
         }
 
-        function refreshAllExpertDropdown(selectedExpertId) {
+        function refreshNoneAssociatedExpertDropdown(selectedExpertId) {
             var systemId = $("#system_id").val();
 
             $.ajax({
-                url: 'get_all_experts.php',
+                url: 'get_none_associated_experts.php',
                 type: 'GET',
                 data: { system_id: systemId },
                 dataType: 'json',
@@ -368,17 +368,17 @@ $systems = $systemsStmt->get_result();
             var systemName = $("#sys_name").text();
   
             $.ajax({
-                url: 'get_all_experts.php',
+                url: 'get_none_associated_experts.php',
                 type: 'GET',
                 data: { system_id: systemId },
                 dataType: 'json',
                 success: function(data) {
                    // Check if the response status is 'success' or 'error'
+                   console.log(data);
                    if (data.status === 'success') {
                         // Populate the form fields with the data retrieved from the server
                         $("#add-existing-expert-form #system_id").val(systemId);  // Set the system ID
                         $("#add-existing-expert-form #sys_name").text(systemName);  // Set the system name
-                        $("#add-existing-expert-form #phone").val(data.expert.phone || '');  // Set the phone number
                     } else {
                         // Handle the case where no expert data was found
                         $("#add-existing-expert-form #system_id").val(systemId);  // Set the system ID
@@ -387,7 +387,7 @@ $systems = $systemsStmt->get_result();
                     }
 
                     // Populate the dropdown with the experts list (if needed)
-                    refreshAllExpertDropdown(data.expert ? data.expert.expert_id : null);
+                    refreshNoneAssociatedExpertDropdown(data.expert ? data.expert.expert_id : null);
 
                     // Open the dialog
                     $("#add-existing-expert-dialog").dialog("open");

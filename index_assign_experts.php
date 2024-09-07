@@ -47,18 +47,84 @@ $experts = $expertsStmt->get_result();
             <div class="cell cellExp"><?= htmlspecialchars($expert['phone'] ?? '') ?></div>
             <div class="cell cellExp"><?= htmlspecialchars($expert['id'] ?? '') ?></div>
             <div class="cell cellExp">
-                <a href="#" class="btn btn-success edit-button action-button"
-                data-system_id="<?= htmlspecialchars($expert['id']) ?>">Assign</a>
+                <a href="#" class="btn btn-success assign_systems-button action-button"
+                data-expert_id="<?= htmlspecialchars($expert['id']) ?>"
+                data-expert_name="<?= htmlspecialchars($expert['name']) ?>"
+                data-expert_phone="<?= htmlspecialchars($expert['phone'] ?? '') ?>">Assign</a>
             </div>
         </div>
         <?php endwhile; ?>
     </div>
+    
+    <!-- Assign Systems to Expert Dialog -->
+    <div id="assign_systems-dialog" title="Edit Expert Systems Assignment" style="display:none;">
+            <form id="edit-form">
+                <div class="form-group">
+                    <label for="Expert Name">Expert:</label>
+                    <span id="exp_name"></span>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone:</label>
+                    <input type="tel" id="phone" name="phone" class="form-control" pattern="^\+?\d*$" placeholder="Enter phone number">
+                </div>
+                <input type="hidden" id="expert_id" name="expert_id">
+                <div class="button-container">
+                    <button type="button" id="add-existing-expert-btn" class="btn btn-primary">Assign All Systems</button>
+                    <button type="button" id="add-expert-btn" class="btn btn-secondary">Unassign All Systems</button>
+                    <button type="button" id="save-only-btn" class="btn btn-success">Save</button>
+                </div>
+            </form>
+        </div>
 
     <script>
         $(document).ready(function() {
             $("#assign-choose-systems-button").click(function() {
                 window.location.href = 'index.php'; 
             });
-        });
+
+            $("#assign_systems-dialog").dialog({
+                width: 320,
+                autoOpen: false,
+                modal: true,
+                buttons: { 
+                    "Save and Exit":{ 
+                        text: "Save and Exit",
+                        class: "save-exit-button",
+                        click: function() {
+                            $(this).dialog("close");
+                        }
+                    },
+                    "Cancel": {
+                        text: "Cancel",
+                        class: "cancel-button", 
+                        click: function() {
+                            $(this).dialog("close");
+                            location.reload();
+                        }
+                    }
+                },
+                close: function() {
+                    location.reload(); // Reload the page when dialog close button (X) is clicked
+                },
+                classes: {
+                    "ui-dialog": "my-dialog",
+                    "ui-dialog-titlebar": "my-dialog-titlebar"
+                }
+            });
+
+            $(".assign_systems-button").click(function(e) {
+                e.preventDefault();
+                var expertName = $(this).data("expert_name");
+                var expertId = $(this).data("expert_id");
+                var expertPhone = $(this).data("expert_phone");
+
+                // Set the expert's name and ID in the dialog
+                $("#exp_name").text(expertName);
+                $("#expert_id").val(expertId);
+                $("#phone").val(expertPhone);
+
+                $("#assign_systems-dialog").dialog("open");
+            });
+    });
     </script>
 </body>

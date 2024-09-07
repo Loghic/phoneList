@@ -113,7 +113,7 @@ h1, h2 {
     background-color: #007bb5;
 }
 
-#current_expert, #sys_name {
+#current_expert, #sys_name, #exp_name {
     font-weight: bold;
 }
 

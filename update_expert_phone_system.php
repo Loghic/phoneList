@@ -8,19 +8,7 @@ if ($conn->connect_error) {
 
 // Check if the required POST variables are set
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    if (!isset($_POST['expert_id'])) {
-        die("Missing exp id.");
-    }
-
-    if (!isset($_POST['phone'])) {
-        die("Missing phone.");
-    }
-
-    if (!isset($_POST['system_ids'])) {
-        die("Missing systems id.");
-    }
-
-    if (!isset($_POST['expert_id']) || !isset($_POST['phone']) || !isset($_POST['system_ids'])) {
+    if (!isset($_POST['expert_id']) || !isset($_POST['phone'])) {
         die("Missing required fields.");
     }
 
@@ -64,37 +52,40 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
     $deleteStmt->close();
 
-    // Add new system associations
-    $insertStmt = $conn->prepare("INSERT INTO Expert_system_person (system_id, person_id) VALUES (?, ?)");
+    if (!empty($systemIds)) {
+        // Add new system associations
+        $insertStmt = $conn->prepare("INSERT INTO Expert_system_person (system_id, person_id) VALUES (?, ?)");
 
-    foreach ($systemIds as $systemId) {
-        // Validate if the system exists
-        $checkSystemStmt = $conn->prepare("SELECT Id FROM Expert WHERE Id = ?");
-        $checkSystemStmt->bind_param("i", $systemId);
-        $checkSystemStmt->execute();
-        $checkSystemStmt->store_result();
+        foreach ($systemIds as $systemId) {
+            // Validate if the system exists
+            $checkSystemStmt = $conn->prepare("SELECT Id FROM Expert WHERE Id = ?");
+            $checkSystemStmt->bind_param("i", $systemId);
+            $checkSystemStmt->execute();
+            $checkSystemStmt->store_result();
 
-        if ($checkSystemStmt->num_rows === 0) {
-            echo "Invalid system_id: No matching system found for system ID $systemId.";
+            if ($checkSystemStmt->num_rows === 0) {
+                echo "Invalid system_id: No matching system found for system ID $systemId.";
+                $checkSystemStmt->close();
+                $insertStmt->close();
+                $conn->close();
+                exit;
+            }
+
             $checkSystemStmt->close();
-            $insertStmt->close();
-            $conn->close();
-            exit;
+            
+            $insertStmt->bind_param("ii", $systemId, $expertId);
+
+            if (!$insertStmt->execute()) {
+                echo "Failed to associate expert with system ID $systemId: " . $insertStmt->error;
+                $insertStmt->close();
+                $conn->close();
+                exit;
+            }
         }
 
-        $checkSystemStmt->close();
-        
-        $insertStmt->bind_param("ii", $systemId, $expertId);
-
-        if (!$insertStmt->execute()) {
-            echo "Failed to associate expert with system ID $systemId: " . $insertStmt->error;
-            $insertStmt->close();
-            $conn->close();
-            exit;
-        }
+        $insertStmt->close();
     }
 
-    $insertStmt->close();
     $conn->close();
     
     echo "Expert updated and assigned successfully.";

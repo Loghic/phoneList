@@ -109,8 +109,8 @@ while ($expert = $expertsResult->fetch_assoc()) {
             </div>
             <input type="hidden" id="expert_id" name="expert_id">
             <div class="button-container">
-                <button type="button" id="add-existing-expert-btn" class="btn btn-primary">Assign All Systems</button>
-                <button type="button" id="add-expert-btn" class="btn btn-secondary">Unassign All Systems</button>
+                <button type="button" id="assign-all-btn" class="btn btn-primary">Assign All Systems</button>
+                <button type="button" id="unassign-all-btn" class="btn btn-secondary">Unassign All Systems</button>
                 <button type="button" id="save-only-btn" class="btn btn-success">Save</button>
             </div>
         </form>
@@ -121,66 +121,43 @@ while ($expert = $expertsResult->fetch_assoc()) {
             $("#assign-choose-systems-button").click(function() {
                 window.location.href = 'index.php'; 
             });
-
-            $("#assign_systems-dialog").dialog({
-                width: 320,
-                autoOpen: false,
-                modal: true,
-                buttons: { 
-                    "Save and Exit": { 
-                        text: "Save and Exit",
-                        class: "save-exit-button",
-                        click: function() {
-                            $.ajax({
-                                url: 'update_expert_phone.php',
-                                type: 'POST',
-                                data: $("#edit-form").serialize(),
-                                success: function(response) {
-                                    alert(response);
-                                    $("#assign_systems-dialog").dialog("close");
-                                    location.reload();
-                                },
-                                error: function(xhr, status, error) {
-                                    alert("Error fetching systems: " + error);
-                                }
-                            });
-                        }
-                    },
-                    "Cancel": {
-                        text: "Cancel",
-                        class: "cancel-button", 
-                        click: function() {
-                            $(this).dialog("close");
-                            location.reload()
-                        }
-                    }
-                },
-                close: function() {
-                    location.reload(); // Reload the page when dialog close button (X) is clicked
-                },
-                classes: {
-                    "ui-dialog": "my-dialog",
-                    "ui-dialog-titlebar": "my-dialog-titlebar"
-                }
-            });
-
+            // Initialize Select2
             $("#systems").select2({
                 placeholder: "Select systems",
                 allowClear: true
             });
 
+            // Assign All Systems button functionality
+            $("#assign-all-btn").click(function() {
+                if (confirm("Are you sure you want to assign all systems?")) {
+                    $("#systems").find('option').prop('selected', true);
+                    $("#systems").trigger('change'); // Notify Select2 to update
+                    $("#save-only-btn").click();
+                    $("#assign_systems-dialog").dialog("close"); // Close the dialog after confirming
+                }
+            });
+
+            // Unassign All Systems button functionality
+            $("#unassign-all-btn").click(function() {
+                if (confirm("Are you sure you want to unassign all systems?")) {
+                    $("#systems").find('option').prop('selected', false);
+                    $("#systems").trigger('change'); // Notify Select2 to update
+                    $("#save-only-btn").click();
+                    $("#assign_systems-dialog").dialog("close"); // Close the dialog after confirming
+                }
+            });
+
+            // Open dialog and populate data
             $(".assign_systems-button").click(function(e) {
                 e.preventDefault();
                 var expertName = $(this).data("expert_name");
                 var expertId = $(this).data("expert_id");
                 var expertPhone = $(this).data("expert_phone");
 
-                // Set the expert's name and ID in the dialog
                 $("#exp_name").text(expertName);
                 $("#expert_id").val(expertId);
                 $("#phone").val(expertPhone);
 
-                // Fetch systems and associated systems for the expert
                 $.ajax({
                     url: 'fetch_expert_systems.php',
                     type: 'GET',
@@ -215,19 +192,20 @@ while ($expert = $expertsResult->fetch_assoc()) {
                     }
                 });
 
-
                 $("#assign_systems-dialog").dialog("open");
             });
 
+            // Save button functionality
             $("#save-only-btn").click(function() {
                 $.ajax({
-                    url: 'update_expert_phone.php',
+                    url: 'update_expert_phone_system.php',
                     type: 'POST',
                     data: $("#edit-form").serialize(),
                     success: function(response) {
-                        console.log(response.trim());
                         if (response.trim() === "Expert updated and assigned successfully.") {
                             alert("Expert system assignment and phone number updated successfully.");
+                            $("#assign_systems-dialog").dialog("close");
+                            location.reload();
                         } else {
                             alert("Error: " + response);
                         }
@@ -237,7 +215,55 @@ while ($expert = $expertsResult->fetch_assoc()) {
                     }
                 });
             });
+
+            // Dialog initialization
+            $("#assign_systems-dialog").dialog({
+                width: 320,
+                autoOpen: false,
+                modal: true,
+                buttons: { 
+                    "Save and Exit": { 
+                        text: "Save and Exit",
+                        class: "save-exit-button",
+                        click: function() {
+                            $.ajax({
+                                url: 'update_expert_phone_system.php',
+                                type: 'POST',
+                                data: $("#edit-form").serialize(),
+                                success: function(response) {
+                                    if (response.trim() === "Expert updated and assigned successfully.") {
+                                        alert(response);
+                                        $("#assign_systems-dialog").dialog("close");
+                                        location.reload();
+                                    } else {
+                                        alert("Error: " + response);
+                                    }
+                                },
+                                error: function(xhr, status, error) {
+                                    alert("Error fetching systems: " + error);
+                                }
+                            });
+                        }
+                    },
+                    "Cancel": {
+                        text: "Cancel",
+                        class: "cancel-button", 
+                        click: function() {
+                            $(this).dialog("close");
+                            location.reload();
+                        }
+                    }
+                },
+                close: function() {
+                    location.reload(); // Reload the page when dialog close button (X) is clicked
+                },
+                classes: {
+                    "ui-dialog": "my-dialog",
+                    "ui-dialog-titlebar": "my-dialog-titlebar"
+                }
+            });
         });
     </script>
+
 </body>
 </html>

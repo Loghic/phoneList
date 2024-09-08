@@ -11,7 +11,7 @@ h1, h2 {
 /* Grid Layout Styles */
 .header-row, .data-row {
     display: flex;
-    border-bottom: 1px solid black; /* Add a solid black border between rows */
+    border-bottom: 1px solid black; 
 }
 
 .select2-container {
@@ -19,12 +19,12 @@ h1, h2 {
 }
 
 .cell {
-    border: 1px solid black; /* Solid black border around each cell */
-    padding: 10px; /* Add padding for spacing */
+    border: 1px solid black; 
+    padding: 10px; 
     box-sizing: border-box;
     flex: 1;
-    text-align: left; /* Align text to the left */
-    background-color: #fff; /* Ensure background color is consistent */
+    text-align: left; 
+    background-color: #fff; 
 }
 
 .header-row {
@@ -33,44 +33,44 @@ h1, h2 {
 }
 
 .header-row .cell {
-    border-bottom: 2px solid black; /* Bold line under the header row */
+    border-bottom: 2px solid black; 
 }
 
 .data-row:nth-child(even) .cell{
-    background-color: #E0E0E0; /* Background color for even rows */
+    background-color: #E0E0E0; 
 }
 
 .data-row:nth-child(odd) .cell{
-    background-color: #fff; /* Background color for odd rows */
+    background-color: #fff; 
 }
 
 .data-row .cell {
-    border-bottom: 1px solid black; /* Regular line under the data row cells */
+    border-bottom: 1px solid black; 
 }
 
 .data-row:last-child .cell {
-    border-bottom: none; /* Remove bottom border from the last row */
+    border-bottom: none; 
 }
 
 /* Action Button Styles */
 .action-button {
-    border-bottom: 2px solid black; /* Add bold line under each action button */
+    border-bottom: 2px solid black; 
     padding: 5px 10px;
     display: block;
-    width: 100%; /* Make the button fill the entire width of its container */
-    text-align: center; /* Center text inside the button */
+    width: 100%; 
+    text-align: center; 
 }
 
 /* Button Styles */
 .button-container {
     display: flex;
-    flex-direction: column; /* Arrange buttons in a column */
-    gap: 10px; /* Adds space between the buttons */
-    align-items: stretch; /* Makes all buttons stretch to the full width of the container */
+    flex-direction: column; 
+    gap: 10px; 
+    align-items: stretch; 
 }
 
 .button-container .btn {
-    width: 100%; /* Makes each button fill the full width of the container */
+    width: 100%; 
 }
 
 .top-buttons{
@@ -134,8 +134,8 @@ h1, h2 {
 /* Close button styles */
 .ui-dialog .ui-dialog-titlebar-close {
     position: absolute;
-    top: 10px; /* Adjust as needed */
-    right: 10px; /* Adjust as needed */
+    top: 10px; 
+    right: 10px;
     width: 20px;
     height: 20px;
     border: none;
@@ -144,17 +144,17 @@ h1, h2 {
 }
 
 .ui-dialog .ui-dialog-titlebar-close::before {
-    content: '×'; /* Unicode character for the multiplication sign */
-    font-size: 18px; /* Adjust size as needed */
-    color: white; /* Close button color */
+    content: '×'; 
+    font-size: 18px; 
+    color: white; 
     display: block;
     text-align: center;
     line-height: 20px;
 }
 
 .ui-dialog .ui-dialog-titlebar-close:hover {
-    background-color: #0056b3; /* Darker background color on hover */
-    border-radius: 50%; /* Circular background */
+    background-color: #0056b3; 
+    border-radius: 50%; 
 }
 
 /* Button styles in dialog */
@@ -163,57 +163,57 @@ h1, h2 {
 }
 
 .ui-dialog .ui-dialog-buttonpane .ui-dialog-buttonset { 
-    width: 100%; /* Ensure button set takes full width */
+    width: 100%; 
     display: flex;
-    justify-content: space-between; /* Center buttons horizontally */
+    justify-content: space-between; 
 }
 
 /* General button styles */
 .save-exit-button, .add-exit-button, .cancel-button {
-    padding: 3px; /* Add more padding for larger buttons */
-    border-radius: 5px; /* Maintain rounded corners */
-    border: none; /* Remove border */
-    margin: 0; /* Space between buttons */
+    padding: 3px; 
+    border-radius: 5px; 
+    border: none; 
+    margin: 0; 
     color: white;
     flex: 1;
 }
 
 /* Styling for Save and Exit button && for Add and Exit button*/
 .save-exit-button, .add-exit-button{
-    background-color: #28a745; /* Green background */
+    background-color: #28a745; 
     margin-right: auto;
 }
 
 .save-exit-button:hover .add-exit-button:hover{
-    background-color: #218838; /* Darker green on hover */
+    background-color: #218838; 
 }
 
 /* Styling for Cancel button */
 .cancel-button {
-    background-color: #dc3545; /* Red background */
+    background-color: #dc3545; 
     margin-left: auto;
 }
 
 .cancel-button:hover {
-    background-color: #c82333; /* Darker red on hover */
+    background-color: #c82333; 
 }
 
 /* Responsive Styles */
 @media (min-width: 769px) {
     .header-row, .data-row {
-        border-bottom: 1px solid black; /* Solid black border between rows */
+        border-bottom: 1px solid black; 
     }
 
     .data-row:last-child  .cell{
-        border-bottom: 1px solid black; /* Remove bottom border from the last row */
+        border-bottom: 1px solid black; 
     }
 
     .cell {
-        border-right: 1px solid #ddd; /* Soft grey line between cells */
+        border-right: 1px solid #ddd;
     }
 
     .cell:last-child {
-        border-right: 2px solid black; /* Solid black line on the rightmost cell */
+        border-right: 2px solid black; 
     }
 }
 
@@ -224,20 +224,20 @@ h1, h2 {
 
     .data-row {
         flex-direction: column;
-        border-bottom: 1px solid black; /* Solid black border around each block */
+        border-bottom: 1px solid black; 
     }
 
     .cell {
-        border: 1px solid black; /* Solid black border around each cell */
-        margin: 0; /* Ensure cells fit within blocks */
+        border: 1px solid black; 
+        margin: 0; 
     }
 
     .cell:not(:last-child) {
-        border-bottom: 1px solid #ddd; /* Greyish line between cells */
+        border-bottom: 1px solid #ddd; 
     }
 
     .data-row:last-child .cell {
-        border-bottom: none; /* Remove bottom border from the last cell */
+        border-bottom: none; 
     }
 
     /* Target the text before the content in each cell on small screens */

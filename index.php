@@ -141,7 +141,7 @@ $systems = $systemsStmt->get_result();
     <script>
     $(document).ready(function() {
         $("#assign-choose-experts-button").click(function() {
-            window.location.href = 'index_assign_experts.php'; // Replace with your URL
+            window.location.href = 'index_assign_experts.php'; 
         });
 
 

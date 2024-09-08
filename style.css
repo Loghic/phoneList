@@ -14,6 +14,10 @@ h1, h2 {
     border-bottom: 1px solid black; /* Add a solid black border between rows */
 }
 
+.select2-container {
+    width: 100% !important;
+}
+
 .cell {
     border: 1px solid black; /* Solid black border around each cell */
     padding: 10px; /* Add padding for spacing */

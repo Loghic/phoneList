@@ -7,9 +7,42 @@ $expertsStmt = $conn->prepare("
     FROM Expert_person e
     ORDER BY name ASC
 ");
-
 $expertsStmt->execute();
-$experts = $expertsStmt->get_result();
+$expertsResult = $expertsStmt->get_result();
+
+// Fetch systems associated with each expert
+$systemsStmt = $conn->prepare("
+    SELECT 
+        e.Id AS expert_id,
+        esp.System_id
+    FROM Expert_person e
+    LEFT JOIN Expert_system_person esp ON e.Id = esp.Person_id
+");
+$systemsStmt->execute();
+$systemsResult = $systemsStmt->get_result();
+$expertSystems = [];
+while ($row = $systemsResult->fetch_assoc()) {
+    $expert_id = $row['expert_id'];
+    $system_id = $row['System_id'];
+    if (!isset($expertSystems[$expert_id])) {
+        $expertSystems[$expert_id] = [];
+    }
+    if ($system_id !== null) {
+        $expertSystems[$expert_id][] = $system_id;
+    }
+}
+
+// Combine expert data with system count
+$expertsWithSystemCount = [];
+while ($expert = $expertsResult->fetch_assoc()) {
+    $id = $expert['id'];
+    $expertsWithSystemCount[] = [
+        'name' => $expert['name'],
+        'phone' => $expert['phone'],
+        'id' => $id,
+        'system_count' => isset($expertSystems[$id]) ? count($expertSystems[$id]) : 0
+    ];
+}
 ?>
 
 <!DOCTYPE html>
@@ -24,6 +57,8 @@ $experts = $expertsStmt->get_result();
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="https://code.jquery.com/ui/1.13.2/jquery-ui.js"></script>
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
+    <script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 </head>
 <body>
     <div class="container mt-4">
@@ -40,12 +75,11 @@ $experts = $expertsStmt->get_result();
             <div class="cell"></div>
         </div>
 
-        <?php while ($expert = $experts->fetch_assoc()): 
-        ?>
+        <?php foreach ($expertsWithSystemCount as $expert): ?>
         <div class="data-row">
             <div class="cell cellExp"><?= htmlspecialchars($expert['name']) ?></div>
             <div class="cell cellExp"><?= htmlspecialchars($expert['phone'] ?? '') ?></div>
-            <div class="cell cellExp"><?= htmlspecialchars($expert['id'] ?? '') ?></div>
+            <div class="cell cellExp"><?= htmlspecialchars($expert['system_count'] ?? '') ?></div>
             <div class="cell cellExp">
                 <a href="#" class="btn btn-success assign_systems-button action-button"
                 data-expert_id="<?= htmlspecialchars($expert['id']) ?>"
@@ -53,28 +87,34 @@ $experts = $expertsStmt->get_result();
                 data-expert_phone="<?= htmlspecialchars($expert['phone'] ?? '') ?>">Assign</a>
             </div>
         </div>
-        <?php endwhile; ?>
+        <?php endforeach; ?>
     </div>
     
     <!-- Assign Systems to Expert Dialog -->
     <div id="assign_systems-dialog" title="Edit Expert Systems Assignment" style="display:none;">
-            <form id="edit-form">
-                <div class="form-group">
-                    <label for="Expert Name">Expert:</label>
-                    <span id="exp_name"></span>
-                </div>
-                <div class="form-group">
-                    <label for="phone">Phone:</label>
-                    <input type="tel" id="phone" name="phone" class="form-control" pattern="^\+?\d*$" placeholder="Enter phone number">
-                </div>
-                <input type="hidden" id="expert_id" name="expert_id">
-                <div class="button-container">
-                    <button type="button" id="add-existing-expert-btn" class="btn btn-primary">Assign All Systems</button>
-                    <button type="button" id="add-expert-btn" class="btn btn-secondary">Unassign All Systems</button>
-                    <button type="button" id="save-only-btn" class="btn btn-success">Save</button>
-                </div>
-            </form>
-        </div>
+        <form id="edit-form">
+            <div class="form-group">
+                <label for="Expert Name">Expert:</label>
+                <span id="exp_name"></span>
+            </div>
+            <div class="form-group">
+                <label for="phone">Phone:</label>
+                <input type="tel" id="phone" name="phone" class="form-control" pattern="^\+?\d*$" placeholder="Enter phone number">
+            </div>
+            <div class="form-group">
+                <label for="systems">Associated Systems: </label>
+                <select id="systems" name="system_ids[]" multiple class="form-control">
+                    <!-- Options will be populated by JavaScript -->
+                </select>
+            </div>
+            <input type="hidden" id="expert_id" name="expert_id">
+            <div class="button-container">
+                <button type="button" id="add-existing-expert-btn" class="btn btn-primary">Assign All Systems</button>
+                <button type="button" id="add-expert-btn" class="btn btn-secondary">Unassign All Systems</button>
+                <button type="button" id="save-only-btn" class="btn btn-success">Save</button>
+            </div>
+        </form>
+    </div>
 
     <script>
         $(document).ready(function() {
@@ -87,11 +127,23 @@ $experts = $expertsStmt->get_result();
                 autoOpen: false,
                 modal: true,
                 buttons: { 
-                    "Save and Exit":{ 
+                    "Save and Exit": { 
                         text: "Save and Exit",
                         class: "save-exit-button",
                         click: function() {
-                            $(this).dialog("close");
+                            $.ajax({
+                                url: 'update_expert_phone.php',
+                                type: 'POST',
+                                data: $("#edit-form").serialize(),
+                                success: function(response) {
+                                    alert(response);
+                                    $("#assign_systems-dialog").dialog("close");
+                                    location.reload();
+                                },
+                                error: function(xhr, status, error) {
+                                    alert("Error fetching systems: " + error);
+                                }
+                            });
                         }
                     },
                     "Cancel": {
@@ -99,7 +151,7 @@ $experts = $expertsStmt->get_result();
                         class: "cancel-button", 
                         click: function() {
                             $(this).dialog("close");
-                            location.reload();
+                            location.reload()
                         }
                     }
                 },
@@ -110,6 +162,11 @@ $experts = $expertsStmt->get_result();
                     "ui-dialog": "my-dialog",
                     "ui-dialog-titlebar": "my-dialog-titlebar"
                 }
+            });
+
+            $("#systems").select2({
+                placeholder: "Select systems",
+                allowClear: true
             });
 
             $(".assign_systems-button").click(function(e) {
@@ -123,8 +180,64 @@ $experts = $expertsStmt->get_result();
                 $("#expert_id").val(expertId);
                 $("#phone").val(expertPhone);
 
+                // Fetch systems and associated systems for the expert
+                $.ajax({
+                    url: 'fetch_expert_systems.php',
+                    type: 'GET',
+                    data: { expert_id: expertId },
+                    dataType: 'json',
+                    success: function(data) {
+                        if (data.error) {
+                            alert(data.error);
+                            return;
+                        }
+
+                        var systemsSelect = $("#systems");
+                        systemsSelect.empty(); // Clear previous options
+
+                        $.each(data.systems, function(index, system) {
+                            var option = $('<option></option>')
+                                .val(system.System_id)
+                                .text(system.System_name);
+
+                            if (data.associated_systems.includes(system.System_id)) {
+                                option.prop('selected', true);
+                            }
+
+                            systemsSelect.append(option);
+                        });
+
+                        // Update Select2 to reflect the changes
+                        systemsSelect.trigger('change');
+                    },
+                    error: function(xhr, status, error) {
+                        alert("Error fetching systems: " + error);
+                    }
+                });
+
+
                 $("#assign_systems-dialog").dialog("open");
             });
-    });
+
+            $("#save-only-btn").click(function() {
+                $.ajax({
+                    url: 'update_expert_phone.php',
+                    type: 'POST',
+                    data: $("#edit-form").serialize(),
+                    success: function(response) {
+                        console.log(response.trim());
+                        if (response.trim() === "Expert updated and assigned successfully.") {
+                            alert("Expert system assignment and phone number updated successfully.");
+                        } else {
+                            alert("Error: " + response);
+                        }
+                    },
+                    error: function(xhr, status, error) {
+                        alert("An unexpected error occurred: " + error);
+                    }
+                });
+            });
+        });
     </script>
 </body>
+</html>

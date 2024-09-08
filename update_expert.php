@@ -27,6 +27,7 @@ $stmt = $conn->prepare("
     WHERE esp.System_id = ?
 ");
 $stmt->bind_param("ii", $expert_id, $system_id);
+
 if ($stmt->execute()) {
     // Update the phone number in Expert_person
     $stmt = $conn->prepare("
@@ -35,13 +36,14 @@ if ($stmt->execute()) {
         WHERE Id = ?
     ");
     $stmt->bind_param("si", $phone, $expert_id);
+    
     if ($stmt->execute()) {
-        echo "Expert assignment and phone number updated successfully.";
+        echo "Expert updated and assigned successfully.";
     } else {
-        echo "Error updating phone number.";
+        echo "Error updating phone number: " . $stmt->error;
     }
 } else {
-    echo "Error updating Assigned_expert_id in Expert table.";
+    echo "Error updating Assigned_expert_id in Expert table: " . $stmt->error;
 }
 
 $stmt->close();

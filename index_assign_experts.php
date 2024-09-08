@@ -202,8 +202,8 @@ while ($expert = $expertsResult->fetch_assoc()) {
                     type: 'POST',
                     data: $("#edit-form").serialize(),
                     success: function(response) {
-                        if (response.trim() === "Expert updated and assigned successfully.") {
-                            alert("Expert system assignment and phone number updated successfully.");
+                        if (response === "Expert assignment and phone number updated successfully.") {
+                            alert(response);
                             $("#assign_systems-dialog").dialog("close");
                             location.reload();
                         } else {

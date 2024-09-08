@@ -223,10 +223,14 @@ $systems = $systemsStmt->get_result();
                             type: 'POST',
                             data: $("#edit-form").serialize(),
                             success: function(response) {
-                                alert(response);
-                                $("#edit-dialog").dialog("close");
-                                refreshExpertDropdown();
-                                location.reload();
+                                if (response.trim() === "Expert updated and assigned successfully.") {
+                                    alert("Expert system assignment and phone number updated successfully.");
+                                    $("#edit-dialog").dialog("close");
+                                    refreshExpertDropdown();
+                                    location.reload();
+                                } else {
+                                    alert("Error: " + response);
+                                }
                             }
                         });
                     }
@@ -343,7 +347,7 @@ $systems = $systemsStmt->get_result();
                 type: 'POST',
                 data: $("#edit-form").serialize(),
                 success: function(response) {
-                    if (response.trim() === "Expert assignment and phone number updated successfully.") {
+                    if (response.trim() === "Expert updated and assigned successfully.") {
                         alert("Expert details updated successfully.");
                         var newExpertName = $("#expert_select option:selected").text();
                         $("#current_expert").text(newExpertName);
